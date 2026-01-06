@@ -4,11 +4,18 @@
 Game::Game() {
     gold = 500;       // Oyuncunun başlangıç para değeri
     gameOver = false;
+
+    mouseTile = nullptr;
+    lastMouseTile = nullptr; // Bir önceki frame’deki tile
+
+    mouseTime = 0.0f;  // Mouse aynı tile üzerinde durma süresi
+    selectedTileCount = 0;
 }
 
 void Game::Update()
 {
- 
+    map.Update();
+
 }
 
 void Game::Draw()
