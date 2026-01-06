@@ -13,4 +13,11 @@ private:
 
     int gold;        // Oyuncu parası 
     bool gameOver;   // Oyun durumu bitmişmi onu bilip yazdırmak amaçlanıyor
+     
+    // Mapde tile seçimi için gereken tanımlamalar
+    Tile* mouseTile;;
+    Tile* lastMouseTile;
+
+    float mouseTime;
+    int selectedTileCount;
 };
