@@ -7,9 +7,9 @@ Game::Game() {
 
     mouseTile = nullptr;
     lastMouseTile = nullptr; // Bir önceki frame’deki tile
+    selectedTile = nullptr;
 
     mouseTime = 0.0f;  // Mouse aynı tile üzerinde durma süresi
-    selectedTileCount = 0;
 }
 
 void Game::Update()
