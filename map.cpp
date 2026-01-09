@@ -1,7 +1,34 @@
 #include "map.h"
 
+static const int ROWS = 6;
+static const int COLS = 12;
+static const float TILE_SIZE = 60.0f;
+
+static int levelData[ROWS][COLS] = {
+    {0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,1,1,1,1,1,1,1,1,1,1,0},
+    {0,1,0,0,0,0,0,0,0,0,1,0},
+    {0,1,0,0,0,0,0,0,0,0,1,0},
+    {0,1,1,1,1,1,1,1,1,1,1,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0},
+};
+
 Map::Map() {
-   tileSize = 50.0f;
+    rows = ROWS;
+    cols = COLS;
+    tileSize = TILE_SIZE;
+
+    for (int y = 0; y < rows; y++) {
+        std::vector<Tile> row;
+        for (int x = 0; x < cols; x++) {
+            Tile t;
+            t.id = levelData[y][x];
+            t.rect = { x * tileSize, y * tileSize, tileSize, tileSize };
+            row.push_back(t);
+        }
+        grid.push_back(row);
+    }
+
 }
 
 void Map::Update() {
@@ -20,27 +47,12 @@ Tile* Map::CheckTile(Vector2 mousePosition){
 }
 
 void Map::Draw() {
-    // Merkez kale 
-    Rectangle castle = {
-        400, 200, 600, 600
-    };
-
-    // Kale duvarı
-    DrawRectangleLinesEx(castle, 8, DARKGRAY);
-
-    // Town Hall 
-    Rectangle townHall = {
-        castle.x + 240,
-        castle.y + 240,
-        120,
-        120
-    };
-
-    DrawRectangleRec(townHall, MAROON);
-    DrawRectangleLinesEx(townHall, 3, BLACK);
-
-    // Kapılar 
-    DrawRectangle(castle.x + 260, castle.y - 20, 80, 20, BROWN);               // North
-    DrawRectangle(castle.x + 260, castle.y + castle.height, 80, 20, BROWN);   // South
+     for (auto& row : grid) {
+        for (auto& tile : row) {
+            Color c = tile.id == 1 ? DARKGRAY : LIGHTGRAY;
+            DrawRectangleRec(tile.rect, c);
+            DrawRectangleLinesEx(tile.rect, 1, BLACK);
+        }
+    }
 
 }
