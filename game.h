@@ -17,7 +17,7 @@ private:
     // Mapde tile seçimi için gereken tanımlamalar
     Tile* mouseTile;;
     Tile* lastMouseTile;
+    Tile* selectedTile;
 
     float mouseTime;
-    int selectedTileCount;
 };
