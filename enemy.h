@@ -2,9 +2,14 @@
 #include "raylib.h"
 #include <vector>
 
+enum EnemyType {
+    GOBLIN,
+    ORC
+};
+
 class Enemy {
 public:
-    Enemy();
+    Enemy(EnemyType type);
 
     void Update();
     void Draw();
@@ -16,9 +21,11 @@ public:
 private:
     std::vector<Vector2> path;
     int currentTarget;
-    float speed;
 
- 
+    EnemyType type;
+
+    float speed;
     float health;
     float maxHealth;
+    float radius;
 };
