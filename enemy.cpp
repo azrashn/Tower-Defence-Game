@@ -1,18 +1,28 @@
 #include "enemy.h"
 #include <cmath>
 
-Enemy::Enemy() {
+Enemy::Enemy(EnemyType t) {
+    type = t;
+
     path.push_back({ 50, 200 });
     path.push_back({ 300, 200 });
     path.push_back({ 300, 400 });
 
     position = path[0];
     currentTarget = 1;
-
-    speed = 2.0f;
     active = true;
 
-    maxHealth = 50.0f;
+    if (type == GOBLIN) {
+        speed = 3.5f;
+        maxHealth = 40.0f;
+        radius = 8.0f;
+    }
+    else if (type == ORC) {
+        speed = 2.0f;
+        maxHealth = 90.0f;
+        radius = 12.0f;
+    }
+
     health = maxHealth;
 }
 
@@ -39,26 +49,29 @@ void Enemy::Update() {
     }
 }
 
-// Damage function
 void Enemy::TakeDamage(float amount) {
     health -= amount;
-
     if (health <= 0) {
         health = 0;
-        active = false; // Die if health is zero
+        active = false;
     }
 }
 
 void Enemy::Draw() {
     if (!active) return;
 
-    DrawCircleV(position, 8, RED);
+    Color bodyColor = RED;
+    if (type == GOBLIN) bodyColor = LIME;
+    else if (type == ORC) bodyColor = DARKGREEN;
+
+    DrawCircleV(position, radius, bodyColor);
+    DrawCircleLines(position.x, position.y, radius, BLACK);
 
     float hpRatio = health / maxHealth;
     DrawRectangle(
-        position.x - 10,
-        position.y - 18,
-        20 * hpRatio,
+        position.x - 12,
+        position.y - 20,
+        24 * hpRatio,
         4,
         GREEN
     );
