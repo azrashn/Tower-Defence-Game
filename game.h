@@ -1,5 +1,7 @@
 #pragma once
 #include "map.h"
+#include "enemy.h"
+#include <vector>
 
 class Game
 {
@@ -20,4 +22,6 @@ private:
     Tile* selectedTile;
 
     float mouseTime;
+
+    std::vector<Enemy> enemies;
 };
