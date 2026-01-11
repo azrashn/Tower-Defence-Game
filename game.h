@@ -24,4 +24,5 @@ private:
     float mouseTime;
 
     std::vector<Enemy> enemies;
+    std::vector<Tower> towers;
 };

@@ -1,4 +1,7 @@
 #include "game.h"
+#include "tower.h"
+#include "enemy.h"
+#include "types.h"
 #include "raylib.h"
 
 Game::Game() {
@@ -6,12 +9,10 @@ Game::Game() {
     gameOver = false;
 
     mouseTile = nullptr;
-    lastMouseTile = nullptr; // Bir önceki frame’deki tile
-    selectedTile = nullptr;
 
-    mouseTime = 0.0f;  // Mouse aynı tile üzerinde durma süresi
+    enemies.push_back(Enemy(GOBLIN)); // enemy ekleme ve çağırma
 
-    enemies.push_back(Enemy()); // enemy ekleme
+
 }
 
 void Game::Update()
@@ -19,43 +20,64 @@ void Game::Update()
     map.Update();
 
     Vector2 mousePosition = GetMousePosition(); // mouse un ekrandaki pozisyonu hesapla
-    mouseTile = map.CheckTile(mousePosition); 
+    mouseTile = map.CheckTile(mousePosition);
 
-    // Mouse aynı tile üzerindeyse süre artsın
-    if (mouseTile && mouseTile == lastMouseTile)
+
+    // Tower güncelle
+    for (Tower& tower : towers)
     {
-       mouseTime += GetFrameTime(); // Son çizilen frama ile önceki arasındaki süre belirlemek için 60FPS
+        tower.Update(enemies);
     }
-    else // diğer türlü tile süresini sıfırla
-    {
-      mouseTime = 0.0f;
-      lastMouseTile = mouseTile;
-    }
+    // Sol mouse butonu ile kule koymak için
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (mouseTile != nullptr) {
+            if (mouseTile->type ==  TileType::BUILDABLE && !mouseTile->occupied) {
 
-    if (mouseTile && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) { // Click yapısı tile ile
-         selectedTile = mouseTile; // yapılan click anını adreste saklıyor. Amaç tıklandığı anda tile seçmek
-    }
+                mouseTile->occupied = true;
+                mouseTile->type = TileType::TOWER;
 
-    for (int i = 0; i < enemies.size(); i++) { 
-        enemies[i].Update();  // özellikleri için ilerde  // index hangi düşman olduğunu gösteren
+                Vector2 towerPos = {
+                    mouseTile->rect.x + mouseTile->rect.width / 2,
+                    mouseTile->rect.y + mouseTile->rect.height / 2
+                };
 
-        if (!enemies[i].active) { 
-            enemies.erase(enemies.begin() + i); // vectorün indexini silmek ve vektör ilerlemesini sabit tutmak için
-            i--;
+                towers.push_back(Tower(towerPos, ARCHER_TOWER));
+            }
         }
     }
 
+    // Enemy güncellemek için
+    for (int i = 0; i < enemies.size(); i++) {
+        enemies[i].Update(); // özellikleri için ilerde  // index hangi düşman olduğunu gösteren
+
+        if (!enemies[i].active)
+        {
+            enemies.erase(enemies.begin() + i);  // vectorün indexini silmek ve vektör ilerlemesini sabit tutmak için
+            i--;
+        }
+    }
 }
 
 
 void Game::Draw()
 {
-   // Haritayı çizme fonksiyonu
+    // Haritayı çizme fonksiyonu
     map.Draw();
 
     if (mouseTile != nullptr)
     {
-       DrawRectangleLinesEx(mouseTile->rect, 2, YELLOW);
+        DrawRectangleLinesEx(mouseTile->rect, 2, YELLOW);
+    }
+
+    // kuleleri çiz
+   for (Tower& tower : towers) {
+      tower.Draw();
+   }
+
+    // Enemy çiz
+    for (Enemy& enemy : enemies)
+    {
+        enemy.Draw();
     }
 
     // Basit UI 
