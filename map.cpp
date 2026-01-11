@@ -24,6 +24,23 @@ Map::Map() {
             Tile t;
             t.id = levelData[y][x];
             t.rect = { x * tileSize, y * tileSize, tileSize, tileSize };
+            
+            // ID → TYPE dönüşümü
+            switch (t.id) {
+            case 6:
+                t.type = ROAD;
+                t.color = ORANGE;
+                break;
+            case 3:
+                t.type = BUILDABLE;
+                t.color = BLUE;
+                break;
+            default:
+                t.type = BLOCKED;
+                t.color = DARKGRAY;
+                break;
+            }
+
             row.push_back(t);
         }
         grid.push_back(row);
