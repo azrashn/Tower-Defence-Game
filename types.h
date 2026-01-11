@@ -3,9 +3,11 @@
 
 enum class TileType // state -> type dönüştürdüm. map.h kısmı buraya gelicek
 {
-    Empty,
-    Blocked,
-    Selected
+    BLOCKED = 0,    // Duvar, Ağaç, Boşluk, SAHTE YOL (Düşman geçemez)
+    ROAD = 1,       // Düşmanın yürüdüğü GERÇEK yol
+    BUILDABLE = 2,  // Kule koyulabilir alan
+    TOWER = 3,      // Üzerinde kule var
+    TARGET = 9      // Pizza (Hedef)
 };
 
 struct Tile

@@ -2,14 +2,6 @@
 #include "raylib.h"
 #include <vector>
 
-// Represents a single square on the grid
-struct Tile
-{
-    Rectangle rect; // Position and size
-    int id;         // Tile type (e.g., 0=Grass, 6=Road)
-    Color color;    // Debug or visual color
-};
-
 // Manages the game board layout
 class Map
 {
