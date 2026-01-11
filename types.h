@@ -1,7 +1,7 @@
 #pragma once
 #include "raylib.h"
 
-enum class TileState
+enum class TileType // state -> type dönüştürdüm. map.h kısmı buraya gelicek
 {
     Empty,
     Blocked,
@@ -11,7 +11,12 @@ enum class TileState
 struct Tile
 {
     Rectangle rect; // ekranın kapladığı alanı temsil ediyor
-    TileState state;
+    TileType type;
+ 
+    // Genel tanımlamalar. map.h kısmı
+    bool occupied;
+    Color color;
+    int id;
 
     // x ve y tile'ı yapıp harita kordinat için tanımlandı
     int gridX;
