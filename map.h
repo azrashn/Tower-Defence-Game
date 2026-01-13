@@ -17,4 +17,5 @@ private:
     int rows;
     int cols;
     float tileSize; // Size of each block in pixels
+    Texture2D backgroundTexture;
 };

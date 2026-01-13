@@ -18,6 +18,8 @@ Map::Map() {
     cols = COLS;
     tileSize = TILE_SIZE;
 
+    backgroundTexture = LoadTexture("assets/level_bg.png");
+
     for (int y = 0; y < rows; y++) {
         std::vector<Tile> row;
         for (int x = 0; x < cols; x++) {
@@ -64,11 +66,19 @@ Tile* Map::CheckTile(Vector2 mousePosition){
 }
 
 void Map::Draw() {
+
+    //Arka plan
+    DrawTexture(backgroundTexture, 0, 0, WHITE);
+
+    //Tile üst katmanı (debug / oyun mantığı)
      for (auto& row : grid) {
         for (auto& tile : row) {
-            Color c = tile.id == 1 ? DARKGRAY : LIGHTGRAY;
-            DrawRectangleRec(tile.rect, c);
-            DrawRectangleLinesEx(tile.rect, 1, BLACK);
+            if (tile.type == ROAD) {
+                DrawRectangleRec(tile.rect, Fade(ORANGE, 0.5f));
+            }
+            else if (tile.type == BUILDABLE) {
+                DrawRectangleRec(tile.rect, Fade(BLUE, 0.5f));
+            }
         }
     }
 
