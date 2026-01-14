@@ -65,6 +65,14 @@ Tile* Map::CheckTile(Vector2 mousePosition){
     return &grid[y][x];
 }
 
+
+bool Map::IsRoad(int gridX, int gridY) const {
+    if (gridX < 0 || gridX >= cols || gridY < 0 || gridY >= rows)
+        return false;
+
+    return grid[gridY][gridX].type == ROAD;
+}
+
 void Map::Draw() {
 
     //Arka plan

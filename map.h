@@ -11,6 +11,9 @@ public:
 
     void Update(); // Yeni güncelledim. Amaç Update işlemi için tanım yapmak.
     Tile* CheckTile(Vector2 mousePosition); // Seçilen tile koridnatı için tanım gerekiyordu
+    
+    //Yol kontrolü
+    bool IsRoad(int gridX, int gridY) const;
 
 private:
     std::vector<std::vector<Tile>> grid; // 2D grid storage
