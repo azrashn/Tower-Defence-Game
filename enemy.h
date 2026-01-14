@@ -1,13 +1,14 @@
-#include "enemy.h"
+#pragma once
+#include "raylib.h"
+#include <vector>
 #include "types.h"
-#include <cmath>
 
-Enemy::Enemy(const std::vector<Vector2>& pathPoints)  {
-    type = GOBLIN; 
-
-    position = path[0];
-    currentTarget = 1;
-    active = true;
+class Enemy {
+public:
+    Enemy(EnemyType type);
+    
+    // geçici süreliğine eklendi
+    Enemy(const std::vector<Vector2>& pathPoints);
 
     if (type == GOBLIN) {
         speed = 3.5f;
