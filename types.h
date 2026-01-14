@@ -10,6 +10,11 @@ enum class TileType // state -> type dönüştürdüm. map.h kısmı buraya geli
     TARGET = 9      // Pizza (Hedef)
 };
 
+enum EnemyType {
+    GOBLIN,
+    ORC
+};
+
 struct Tile
 {
     Rectangle rect; // ekranın kapladığı alanı temsil ediyor
