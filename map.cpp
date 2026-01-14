@@ -1,4 +1,5 @@
 #include "map.h"
+#include "types.h"
 
 static const int ROWS = 6;
 static const int COLS = 12;

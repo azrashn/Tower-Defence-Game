@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include <vector>
+#include "types.h"
 
 // Manages the game board layout
 class Map
