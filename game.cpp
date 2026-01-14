@@ -1,7 +1,7 @@
 #include "game.h"
+#include "types.h"
 #include "tower.h"
 #include "enemy.h"
-#include "types.h"
 #include "raylib.h"
 
 Game::Game() {
@@ -10,8 +10,17 @@ Game::Game() {
 
     mouseTile = nullptr;
 
-    enemies.push_back(Enemy(GOBLIN)); // enemy ekleme ve çağırma
+    const int rawPath[][2] = { // dönüş yerleri hesaplanarak ilerleme sağlanıyor.
 
+        {0, 1},   // Başlangıç Sol taraf, 1. satır
+        {10, 1},  // Sağa kadar git
+        {10, 3},  // Aşağı in -> 3. satıra
+        {1, 3},   // Sola kadar gel)
+        {1, 5},   // Aşağı in -> 5. satır
+        {11, 5}   // Bitiş 
+    };
+
+    LoadPathFromGrid(rawPath, 6); // kaç adet olduğu
 
 }
 
@@ -46,6 +55,10 @@ void Game::Update()
         }
     }
 
+    if (enemies.empty()) {
+        enemies.push_back(Enemy(levelPath));
+    }
+
     // Enemy güncellemek için
     for (int i = 0; i < enemies.size(); i++) {
         enemies[i].Update(); // özellikleri için ilerde  // index hangi düşman olduğunu gösteren
@@ -58,6 +71,15 @@ void Game::Update()
     }
 }
 
+void Game::LoadPathFromGrid(const int points[][2], int count) {
+    levelPath.clear();
+
+    for (int i = 0; i < count; i++) {
+        float px = points[i][0] * 60 + 30; //yarısı alınarak yolun ortasında durma mantığı
+        float py = points[i][1] * 60 + 30;
+        levelPath.push_back({ px, py });
+    }
+}
 
 void Game::Draw()
 {
