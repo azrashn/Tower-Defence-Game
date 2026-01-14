@@ -2,6 +2,8 @@
 #include "map.h"
 #include "enemy.h"
 #include <vector>
+#include "raylib.h"
+#include "tower.h"
 
 class Game
 {
@@ -25,4 +27,6 @@ private:
 
     std::vector<Enemy> enemies;
     std::vector<Tower> towers;
+
+     void LoadPathFromGrid(const int points[][2], int count);
 };

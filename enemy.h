@@ -1,15 +1,14 @@
 #pragma once
 #include "raylib.h"
 #include <vector>
-
-enum EnemyType {
-    GOBLIN,
-    ORC
-};
+#include "types.h"
 
 class Enemy {
 public:
     Enemy(EnemyType type);
+    
+    // geçici süreliğine eklendi
+    Enemy(const std::vector<Vector2>& pathPoints);
 
     void Update();
     void Draw();
