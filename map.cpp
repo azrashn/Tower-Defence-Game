@@ -3,7 +3,7 @@
 
 static const int ROWS = 6;
 static const int COLS = 12;
-static const float TILE_SIZE = 60.0f;
+static const float TILE_SIZE = 40.0f;
 
 static int levelData[ROWS][COLS] = {
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // üstten giriş
@@ -20,6 +20,8 @@ Map::Map() {
     tileSize = TILE_SIZE;
 
     backgroundTexture = LoadTexture("assets/level_bg.png");
+
+    t.occupied = false;
 
     for (int y = 0; y < rows; y++) {
         std::vector<Tile> row;
@@ -74,6 +76,18 @@ bool Map::IsRoad(int gridX, int gridY) const {
     return grid[gridY][gridX].type == ROAD;
 }
 
+
+Tile* Map::GetTileAtPosition(Vector2 mousePos) {
+
+    int gridX = (int)(mousePos.x / tileSize);
+    int gridY = (int)(mousePos.y / tileSize);
+
+    if (gridX < 0 || gridX >= cols || gridY < 0 || gridY >= rows)
+        return nullptr;
+
+    return &grid[gridY][gridX];
+}
+
 void Map::Draw() {
 
     //Arka plan
@@ -87,6 +101,13 @@ void Map::Draw() {
             }
             else if (tile.type == BUILDABLE) {
                 DrawRectangleRec(tile.rect, Fade(BLUE, 0.5f));
+
+                 //Kule yeri işareti
+                Vector2 center = {
+                    tile.rect.x + tileSize / 2,
+                    tile.rect.y + tileSize / 2
+                };
+                DrawCircleV(center, 4, WHITE);
             }
         }
     }
