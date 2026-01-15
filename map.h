@@ -4,8 +4,7 @@
 #include "types.h"
 
 // Manages the game board layout
-class Map
-{
+class Map{
 public:
     Map();       // Sets up the grid
     void Draw(); // Renders the whole map
@@ -15,6 +14,8 @@ public:
     
     //Yol kontrolü
     bool IsRoad(int gridX, int gridY) const;
+
+    //Tile* GetTileAtPosition(Vector2 mousePos);
 
 private:
     std::vector<std::vector<Tile>> grid; // 2D grid storage
