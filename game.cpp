@@ -77,6 +77,8 @@ void Game::Update()
     }
 }
 
+void Game::Reset() {  }
+
 void Game::LoadPathFromGrid(const int points[][2], int count) {
     levelPath.clear();
 
