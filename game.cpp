@@ -8,6 +8,9 @@ Game::Game() {
     gold = 500;       // Oyuncunun başlangıç para değeri
     gameOver = false;
 
+    maxTargetHealth = 100.0f;
+    targetHealth = maxTargetHealth;
+
     mouseTile = nullptr;
 
     const int rawPath[][2] = { // dönüş yerleri hesaplanarak ilerleme sağlanıyor.
@@ -21,7 +24,6 @@ Game::Game() {
     };
 
     LoadPathFromGrid(rawPath, 6); // kaç adet olduğu
-
 }
 
 void Game::Update()
@@ -31,6 +33,10 @@ void Game::Update()
     Vector2 mousePosition = GetMousePosition(); // mouse un ekrandaki pozisyonu hesapla
     mouseTile = map.CheckTile(mousePosition);
 
+    static TowerType currentTowerType = ARCHER_TOWER;
+
+    if (IsKeyPressed(KEY_A)) currentTowerType = ARCHER_TOWER;
+    if (IsKeyPressed(KEY_S)) currentTowerType = MAGE_TOWER;
 
     // Tower güncelle
     for (Tower& tower : towers)
@@ -75,8 +81,8 @@ void Game::LoadPathFromGrid(const int points[][2], int count) {
     levelPath.clear();
 
     for (int i = 0; i < count; i++) {
-        float px = points[i][0] * 60 + 30; //yarısı alınarak yolun ortasında durma mantığı
-        float py = points[i][1] * 60 + 30;
+        float px = points[i][0] * 40 + 20; //yarısı alınarak yolun ortasında durma mantığı
+        float py = points[i][1] * 40 + 20;
         levelPath.push_back({ px, py });
     }
 }
