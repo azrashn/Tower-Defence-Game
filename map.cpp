@@ -1,23 +1,37 @@
 #include "map.h"
 #include "types.h"
 
-static const int ROWS = 6;
-static const int COLS = 12;
-static const float TILE_SIZE = 40.0f;
+const int ROWS_COUNT = 20;
+const int COLS_COUNT = 36;
+static const float TILE_SIZE = 60.0f;
 
-static int levelData[ROWS][COLS] = {
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // üstten giriş
-    { 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0 },
-    { 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 6, 0 },
-    { 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0 }, // yatay dönüş
-    { 0, 6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 },
-    { 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6 }  // çıkış
+int level1Data[ROWS_COUNT][COLS_COUNT] = {
+    {0,0,0,0,0,2,6,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,2,6,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,2,6,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,2,6,6,2,2,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,2,2,6,6,2,2,2,2,2,2,2,2,2,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,2,2,6,6,6,6,6,6,6,6,6,6,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,6,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,2,6,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,3,3,3,3,3,3,3,3,3,3,3,3,3,2,6,2,3,0,0,0,0,0,0,0,0,2,2,2,2,2,2,0,0},
+    {0,0,3,2,2,2,2,2,2,2,2,2,2,2,2,2,6,6,2,3,0,0,0,2,2,2,2,2,2,6,6,6,6,2,0,0},
+    {0,0,2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,2,0,0,0,0,0,0,0,0,0,0,2,6,9,9,6,2,0,0},
+    {0,2,6,6,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,2,6,9,9,6,2,0,0},
+    {0,2,6,2,3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,2,6,6,6,6,2,0,0},
+    {0,2,6,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,6,2,2,2,2,0,0},
+    {0,2,6,2,3,0,0,0,0,0,0,0,0,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,6,2,0,0,0,0,0},
+    {0,2,6,2,3,3,3,3,3,3,3,3,3,2,2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,2,0,0,0,0,0},
+    {0,2,6,6,2,2,2,2,2,2,2,2,2,6,6,6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0},
+    {0,0,2,6,6,6,6,6,6,6,6,6,6,6,2,2,3,3,0,0,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0},
+    {0,0,0,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 };
 
 Map::Map() {
+    tileSize = TILE_SIZE;
     rows = ROWS;
     cols = COLS;
-    tileSize = TILE_SIZE;
 
     backgroundTexture = LoadTexture("assets/level_bg.png");
 
@@ -26,23 +40,36 @@ Map::Map() {
     for (int y = 0; y < rows; y++) {
         std::vector<Tile> row;
         for (int x = 0; x < cols; x++) {
+
             Tile t;
             t.id = levelData[y][x];
             t.rect = { x * tileSize, y * tileSize, tileSize, tileSize };
-            
-            // ID → TYPE dönüşümü
+
             switch (t.id) {
-            case 6:
+
+            case 6: // GERÇEK YOL
                 t.type = ROAD;
-                t.color = ORANGE;
+                t.color = Fade(ORANGE, 0.6f);
                 break;
-            case 3:
-                t.type = BUILDABLE;
-                t.color = BLUE;
-                break;
-            default:
+
+            case 2: // SAHTE YOL (sadece görsel)
                 t.type = BLOCKED;
-                t.color = DARKGRAY;
+                t.color = Fade(ORANGE, 0.3f);
+                break;
+
+            case 5: // GİZLİ YOL (oyuncu görmez)
+                t.type = ROAD;
+                t.color = Fade(GREEN, 0.25f);
+                break;
+
+            case 3: // KULE YERİ
+                t.type = BUILDABLE;
+                t.color = Fade(BLUE, 0.4f);
+                break;
+
+            default: // BOŞ / GEÇİLMEZ
+                t.type = BLOCKED;
+                t.color = BLANK;
                 break;
             }
 
@@ -50,23 +77,26 @@ Map::Map() {
         }
         grid.push_back(row);
     }
-
 }
 
 void Map::Update() {
 
 }
 
-Tile* Map::CheckTile(Vector2 mousePosition){
 
-    int x = mousePosition.x / tileSize;
-    int y = mousePosition.y / tileSize;
 
-    if (x < 0 || y < 0 || x >= cols || y >= rows)
+Tile* Map::CheckTile(Vector2 mousePosition) {
+
+    int gridX = (int)(mousePosition.x / tileSize);
+    int gridY = (int)(mousePosition.y / tileSize);
+
+    if (gridX < 0 || gridX >= cols || gridY < 0 || gridY >= rows)
         return nullptr;
 
-    return &grid[y][x];
+    return &grid[gridY][gridX];
 }
+
+
 
 
 bool Map::IsRoad(int gridX, int gridY) const {
@@ -77,16 +107,6 @@ bool Map::IsRoad(int gridX, int gridY) const {
 }
 
 
-Tile* Map::GetTileAtPosition(Vector2 mousePos) {
-
-    int gridX = (int)(mousePos.x / tileSize);
-    int gridY = (int)(mousePos.y / tileSize);
-
-    if (gridX < 0 || gridX >= cols || gridY < 0 || gridY >= rows)
-        return nullptr;
-
-    return &grid[gridY][gridX];
-}
 
 void Map::Draw() {
 
