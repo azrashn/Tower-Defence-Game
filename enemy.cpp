@@ -1,6 +1,7 @@
 #include "enemy.h"
 #include "raymath.h" 
 #include <cmath>
+#include "raylib.h"
 
 Enemy::Enemy(std::vector<Vector2> pathPoints, EnemyType t) {
 

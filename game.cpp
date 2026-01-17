@@ -3,6 +3,7 @@
 #include "tower.h"
 #include "enemy.h"
 #include "raylib.h"
+#include "wave.h" // <--- EKLENDİ: Wave sistemini dahil ettik
 
 Game::Game() {
     gold = 500;       // Oyuncunun başlangıç para değeri
@@ -42,8 +43,10 @@ void Game::LoadPathFromGrid(const int points[][2], int count) {
     }
 }
 
-void Game::Update()
-{
+void Game::Update() {
+    // Oyun bittiyse (Kaybettiysek) durdur
+    if (gameOver) return;
+
     map.Update();
 
     // Kule Tipi Seçimi
@@ -63,6 +66,7 @@ void Game::Update()
     {
         tower.Update(enemies);
     }
+
     // Sol mouse butonu ile kule koymak için
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         Vector2 mousePos = GetMousePosition();
@@ -93,13 +97,15 @@ void Game::Update()
         }
     }
 
-    if (enemies.empty()) {
-        enemies.push_back(Enemy(levelPath));
+    // <--- DEĞİŞTİ: Eski manuel spawn kodu silindi.
+    // Artık düşman üretimini WaveManager yönetiyor.
+    if (!waveManager.IsVictory()) {
+        waveManager.Update(enemies, levelPath);
     }
 
-    // Enemy güncellemek için
+    // Enemy güncellemek ve silmek için
     for (int i = 0; i < enemies.size(); i++) {
-        enemies[i].Update(); // özellikleri için ilerde  // index hangi düşman olduğunu gösteren
+        enemies[i].Update();
 
        if (!enemies[i].active) {
             // Hedefe ulaştı mı yoksa biz mi vurduk?
@@ -121,11 +127,12 @@ void Game::Update()
     }
 }
 
-void Game::Reset() {  }
+void Game::Reset() {
+    // Reset mantığı ileride buraya eklenebilir
+}
 
 
-void Game::Draw()
-{
+void Game::Draw() {
     // Haritayı çizme fonksiyonu
     map.Draw();
 
@@ -156,7 +163,15 @@ void Game::Draw()
 
     DrawLine(0, 800, GetScreenWidth(), 800, DARKGRAY);
 
+    // <--- EKLENDİ: Wave bilgisini ekrana yazdır (Örn: WAVE: 1 / 5)
+    waveManager.Draw();
+
+    // Oyun Sonu ve Zafer Ekranları
     if (gameOver) {
         DrawText("GAME OVER", 400, 300, 40, RED);
+    }
+    else if (waveManager.IsVictory()) {
+        // <--- EKLENDİ: Zafer durumu kontrolü
+        DrawText("VICTORY!", 400, 300, 50, GREEN);
     }
 }

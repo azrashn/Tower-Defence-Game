@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include "types.h"
 #include <vector>
+#include "types.h" // <--- DÜZELTME: EnemyType tanımını buradan alacak
 
 class Enemy {
 public:
@@ -19,6 +20,11 @@ public:
 
     bool active;
     Vector2 position;
+
+    // Draw ve çarpışma kontrolü için public değişkenler
+    float radius;
+    float health;
+    float maxHealth;
 
 private:
     std::vector<Vector2> pathPoints;

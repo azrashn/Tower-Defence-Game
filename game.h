@@ -5,6 +5,7 @@
 #include "raylib.h"
 #include "tower.h"
 #include "constants.h"
+#include "wave.h" // <--- EKLENDİ: WaveManager dosyasını dahil ettik
 
 class Game{
 public:
@@ -13,14 +14,14 @@ public:
     void Draw();
     void Reset(); // Oyunu sıfırlama fonksiyonu
 
-    bool gameOver; // Oyun durumu bitmişmi onu bilip yazdırmak amaçlanıyor
+    bool gameOver; // Oyun durumu bitmiş mi onu bilip yazdırmak amaçlanıyor
 
 private:
     Map map; // nesne 
     std::vector<Enemy> enemies;
     std::vector<Tower> towers;
 
-    //  Düşmanların izleyeceği sabit rota
+    // Düşmanların izleyeceği sabit rota
     std::vector<Vector2> levelPath;
 
     int gold; // Oyuncu parası 
