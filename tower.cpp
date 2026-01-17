@@ -2,48 +2,67 @@
 #include "raymath.h" 
 #include <iostream>
 
+
+// Değişkenleri tanımlama
+Texture2D Tower::texArcher = { 0 };
+Texture2D Tower::texMage = { 0 };
+Texture2D Tower::texCannon = { 0 };
+
+// Resmleri Yükleme Fonksiyonu
+void Tower::InitTextures() {
+    texArcher = LoadTexture("assets/tower_archer.png");
+    texMage = LoadTexture("assets/tower_mage.png");
+    texCannon = LoadTexture("assets/tower_cannon.png");
+}
+
+// Resimleri Silme Fonksiyonu
+void Tower::UnloadTextures() {
+    UnloadTexture(texArcher);
+    UnloadTexture(texMage);
+    UnloadTexture(texCannon);
+}
+
 Tower::Tower(Vector2 pos, TowerType t) {
     position = pos;
     type = t;
-    level = 1;          // Seviye 1 başlar
+    level = 1; // seviye 1 başlar
 
     upgradeCost = 150;
     cooldownTimer = 0.0f;
     targetEnemy = nullptr;
 
     if (type == ARCHER_TOWER) {
-        damage = 15;
-        fireCooldown = 0.8f; // Hızlı ateş
+        damage = 8;
+        fireCooldown = 0.8f; 
         range = 150.0f;
-        bulletSpeed = 8.0f;  // Ok hızlı gider
-        upgradeCost = 100;   // Okçu daha ucuz olsun
+        bulletSpeed = 6.0f;  
+        upgradeCost = 100;  
     }
     else if (type == MAGE_TOWER) {
-        damage = 60;         // Yüksek hasar
-        fireCooldown = 2.5f; // Yavaş dolum
-        range = 220.0f;      // Daha uzun menzil
-        bulletSpeed = 5.0f;  // Büyü topu yavaş süzülür
-        upgradeCost = 300;   // Büyücü pahalı olsun
+        damage = 30;         //  hasar
+        fireCooldown = 2.5f; // dolumma süresi
+        range = 220.0f;      // menzil
+        bulletSpeed = 3.0f;  // mermi süzülür
+        upgradeCost = 300;   // yükseltme fiyatı
     }
     else if (type == CANNON_TOWER) {
-        damage = 40; // Orta-Yüksek hasar
-        fireCooldown = 1.5f; // Orta hız
-        range = 130.0f; // Kısa menzil
-        bulletSpeed = 6.0f;
+        damage = 16; 
+        fireCooldown = 1.5f; 
+        range = 130.0f; 
+        bulletSpeed = 4.5f;
         upgradeCost = 200;
     }
 
-    // Fiyatları buraya manuel yazıyoruz veya sabitlerden çekiyoruz
     if (type == ARCHER_TOWER) totalSpent = 100;
     else if (type == MAGE_TOWER) totalSpent = 300;
     else if (type == CANNON_TOWER) totalSpent = 200;
 }
 
-// KULEYİ GÜncelleme FONKSİYONU
+// Kuleyi Güncelleme Fonksiyonu
 void Tower::Upgrade() {
 
-    int cost = GetUpgradeCost(); // Upgrade maliyeti neyse
-    totalSpent += cost;          // Toplam harcamaya ekle
+    int cost = GetUpgradeCost(); // Upgrade maliyeti
+    totalSpent += cost;          
 
     level++;            // Seviye atla
     damage += 15.0f;    // Hasarı artır
@@ -60,11 +79,11 @@ void Tower::Upgrade() {
 
 void Tower::Update(std::vector<Enemy>& enemies) {
 
-    // --- BÖLÜM 1: MERMİLERİ HAREKET ETTİR (GÜDÜMLÜ SİSTEM) ---
+    //  MERMİLERİ HAREKET ETTİRME TASARIMI
     for (int i = 0; i < bullets.size(); i++) {
         if (bullets[i].active) {
 
-            // Eğer kilitlendiğimiz düşman hala yaşıyorsa, hedefi güncelle (Takip Et)
+            // Eğer kilitlendiğimiz düşman hala yaşıyorsa, hedefi güncelle -> Takip Et
             if (bullets[i].lockedEnemy != nullptr &&
                 bullets[i].lockedEnemy->active &&
                 bullets[i].lockedEnemy->GetHealth() > 0) {
@@ -86,10 +105,8 @@ void Tower::Update(std::vector<Enemy>& enemies) {
         }
     }
 
-    // --- BÖLÜM 2: ATEŞ ETME MANTIĞI ---
-
-    // Silahı Soğut
-    if (cooldownTimer > 0) {
+    //  ATEŞ ETME MANTIĞI 
+    if (cooldownTimer > 0) {  // Silahı Soğut
         cooldownTimer -= GetFrameTime();
     }
 
@@ -107,7 +124,26 @@ void Tower::Update(std::vector<Enemy>& enemies) {
             // Ateş Etme Hazır mı?
             if (cooldownTimer <= 0) {
 
-                // 1. HASAR VER (Anlık vuruş - Hitscan)
+                if (type == CANNON_TOWER) {
+                    float explosionRadius = 70.0f; // Patlama çapı (ne kadar geniş vuracağı)
+
+                    // Tüm düşmanları kontrol et: Hedefin yakınındakiler de hasar yesin
+                    for (Enemy& subEnemy : enemies) {
+                        if (subEnemy.active) {
+                            // Hedef düşmana olan mesafesi 70 birimden az olan herkesi vur
+                            if (Vector2Distance(subEnemy.position, enemy.position) <= explosionRadius) {
+                                subEnemy.TakeDamage(damage);
+                            }
+                        }
+                    }
+                    std::cout << "BOOM!Area damage dealt" << std::endl;
+                }
+                // 2. DİĞER KULELER İSE TEK HEDEFİ VUR
+                else {
+                    enemy.TakeDamage(damage);
+                }
+
+                //  Hasar verme (Anlık vuruş - Hitscan)
                 enemy.TakeDamage(damage);
 
                 // Eğer ateş eden kule BÜYÜCÜ ise yavaşlatma uygula
@@ -116,11 +152,11 @@ void Tower::Update(std::vector<Enemy>& enemies) {
                     enemy.ApplySlow(0.5f, 2.0f);
                 }
 
-                // 2. MERMİ OLUŞTUR (Görsel Efekt)
+                //  mermi oluşturma görsel olarak
                 Bullet b;
                 b.position = position;
                 b.targetPos = enemy.position;
-                b.lockedEnemy = &enemy;       // Düşmana kilitlen! (types.h'da eklediğimiz pointer)
+                b.lockedEnemy = &enemy;       // Düşmana kilitlenme
                 b.speed = bulletSpeed;
                 b.damage = damage;
                 b.active = true;
@@ -141,34 +177,57 @@ int Tower::GetSellRefund() const {
 }
 
 void Tower::Draw() {
-    // 1. Kule Rengini Belirle
-    Color towerColor = GRAY;
-    if (type == ARCHER_TOWER) towerColor = BLUE;
-    else if (type == MAGE_TOWER) towerColor = PURPLE;
-    else if (type == CANNON_TOWER) towerColor = RED;
+   
+    // KULE TİPİNE GÖRE RESİM SEÇİMİ
+    Texture2D* currentTex = &texArcher; // Varsayılan
 
-    // 2. Menzil Çizimi (ARTIK GÖRÜNÜR)
-    // Hafif şeffaf gri bir daire
-    DrawCircleLines((int)position.x, (int)position.y, range, Fade(DARKGRAY, 0.5f));
+    if (type == MAGE_TOWER) {
+        currentTex = &texMage;
+    }
+    else if (type == CANNON_TOWER) {
+        currentTex = &texCannon;
+    }
 
-    // 3. Kule Gövdesi (Kare)
-    DrawRectangle((int)position.x - 16, (int)position.y - 16, 32, 32, towerColor);
-    DrawRectangleLines((int)position.x - 16, (int)position.y - 16, 32, 32, BLACK); // Siyah çerçeve
+    //MENZİL ÇİZİMİ
+    DrawCircleLines((int)position.x, (int)position.y, range, Fade(DARKGRAY, 0.4f));// Hafif şeffaf gri bir daire 
 
-    // 4. Seviye Yazısı
-    DrawText(TextFormat("Lvl %d", level), (int)position.x - 10, (int)position.y - 30, 10, WHITE);
+    // KULE GÖVDESİ 
+    Rectangle sourceRec = { // Resmin tamamını alarak kullanıyoruz
+        0.0f, 0.0f,
+        (float)currentTex->width,
+        (float)currentTex->height
+    };
 
-    // 5. MERMİLERİ ÇİZ
+    Rectangle destRec = { // hangi boyutta belirtmek için
+        position.x,
+        position.y,
+        40.0f,
+        40.0f
+    };
+
+    // Merkezi Resmin tam ortasını, pozisyonun üzerine, tile'ın yarısı 
+    Vector2 origin = { 20.0f, 20.0f };
+
+    // Resmi Çiz
+    DrawTexturePro(*currentTex, sourceRec, destRec, origin, 0.0f, WHITE);
+
+    // Kulenin biraz üzerine seviyesini yazalım
+    DrawText(TextFormat("Lvl %d", level), (int)position.x - 10, (int)position.y - 30, 10, BLACK);
+
+    //  MERMİLERİ ÇİZ
     for (const Bullet& b : bullets) {
         if (b.active) {
             if (b.type == ARCHER_TOWER) {
-                DrawCircleV(b.position, 4, BLACK);
+                // Okçu mermisi: Küçük Kahverengi nokta
+                DrawCircleV(b.position, 4, BROWN);
             }
             else if (b.type == MAGE_TOWER) {
+                // Büyücü mermisi: Parlak mor küre
                 DrawCircleV(b.position, 6, VIOLET);
             }
             else if (b.type == CANNON_TOWER) {
-                DrawRectangle(b.position.x - 5, b.position.y - 5, 10, 10, BLACK);
+                // Topçu mermisi: Kare veya büyük siyah gülle
+                DrawCircleV(b.position, 5, DARKGRAY);
             }
         }
     }

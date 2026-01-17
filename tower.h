@@ -16,15 +16,20 @@ public:
     //  Kuleyi geliştir
     void Upgrade();
 
-    // Yükseltme maliyetini sor (UI'da göstermek için)
-    int GetUpgradeCost() const { return upgradeCost; }
-    int GetLevel() const { return level; }
+    // Yükseltme maliyetini sorma 
+    int GetUpgradeCost() const {
+        return upgradeCost;
+    }
+    int GetLevel() const {
+        return level; 
+    }
+
     int GetSellRefund() const;
 
     Vector2 position;
     TowerType type;
 
-    int level;          // Kule Seviyesi (1, 2, 3...)
+    int level;          // Kule Seviyesi 
     float range;        // Menzil
     float damage;       // Hasar
     float fireCooldown;   // Atış bekleme süresi
@@ -37,6 +42,13 @@ public:
     Enemy* targetEnemy;
 
     std::vector<Bullet> bullets; // Kulenin attığı mermiler
-};
 
+    // Bu fonksiyonları Game sınıfında çağırıp asset yüklenecek
+    static void InitTextures();   // Resimleri yükle
+    static void UnloadTextures(); // Resimleri sil
+
+    static Texture2D texArcher;
+    static Texture2D texMage;
+    static Texture2D texCannon;
+};
 #endif
