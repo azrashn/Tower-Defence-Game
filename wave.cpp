@@ -1,39 +1,57 @@
-#include "wave.h" // Dosya isminle uyumlu
+#include "wave.h" 
 #include <string>
 
 WaveManager::WaveManager() {
     currentWaveIndex = 0;
     spawnTimer = 0.0f;
-    waveDelayTimer = 0.0f;
+    waveDelayTimer = 2.0f; // oyun başı hazırlık
     enemiesSpawnedSoFar = 0;
+    isSpawning = false;
 }
 
 void WaveManager::Init() {
     // --- OYUN DENGESİ (Balancing) BURADA YAPILIR ---
     // { Goblin Sayısı, Orc Sayısı, Çıkış Hızı }
-    waves.push_back({ 5,  0, 1.5f }); // 1. Dalga: 5 Goblin
-    waves.push_back({ 3,  2, 2.0f }); // 2. Dalga: Karışık
-    waves.push_back({ 0,  5, 2.5f }); // 3. Dalga: Orc Saldırısı
-    waves.push_back({ 10, 5, 1.0f }); // 4. Dalga: Hızlı Akın
-    waves.push_back({ 5, 10, 1.5f }); // 5. Dalga: Final Boss
+    waves.clear();
+
+    waves.push_back({ 10,  2, 1.5f }); // 1. Dalga: 5 Goblin
+    waves.push_back({ 12,  3, 1.5f }); // 2. Dalga: Karışık
+    
+    for (int i = 2; i < 5; i++) {
+        int goblins = i * 5;
+        int orcs = i + GetRandomValue(0, 5);
+
+        float interval = 1.0f - (i * 0.05f);
+        if (interval < 0.2f) interval = 0.2f;
+
+        waves.push_back({ goblins, orcs, interval });
+    }
 }
 
 void WaveManager::Update(std::vector<Enemy>& enemies, const std::vector<Vector2>& path) {
 
-    if (currentWaveIndex >= waves.size()) return;
+     if (IsVictory()) return;
 
-    WaveDef& currentWave = waves[currentWaveIndex];
-    int totalEnemiesInWave = currentWave.goblinCount + currentWave.orcCount;
+    WaveDef& wave = waves[currentWaveIndex];
+    int totalEnemies = wave.goblinCount + wave.orcCount;
 
-    // Dalga bitti mi?
-    if (enemiesSpawnedSoFar >= totalEnemiesInWave) {
-        if (enemies.empty()) { // Sahne temizlendi mi?
-            waveDelayTimer += GetFrameTime();
-            if (waveDelayTimer > 3.0f) { // 3 Saniye Mola
-                currentWaveIndex++;
-                enemiesSpawnedSoFar = 0;
-                waveDelayTimer = 0.0f;
-            }
+    // Tüm düşmanlar spawnlandıysa
+    if (!isSpawning) {
+        waveDelayTimer -= GetFrameTime();
+        if (waveDelayTimer <= 0.0f) {
+            isSpawning = true;
+            enemiesSpawnedSoFar = 0;
+            spawnTimer = 0.0f;
+        }
+        return;
+    }
+
+
+    if (enemiesSpawnedSoFar >= totalEnemies) {
+        if (enemies.empty()) {
+            isSpawning = false;
+            currentWaveIndex++;
+            waveDelayTimer = 4.0f;
         }
         return;
     }
@@ -41,31 +59,31 @@ void WaveManager::Update(std::vector<Enemy>& enemies, const std::vector<Vector2>
     // Düşman Üretimi (Spawning)
     spawnTimer += GetFrameTime();
 
-    if (spawnTimer >= currentWave.spawnInterval) {
+    if (spawnTimer >= wave.spawnInterval) {
         spawnTimer = 0.0f;
 
-        EnemyType typeToSpawn;
+        EnemyType type;
 
         // Önce Goblinler, bitince Orclar gelsin
-        if (enemiesSpawnedSoFar < currentWave.goblinCount) {
-            typeToSpawn = GOBLIN;
+        if (enemiesSpawnedSoFar < wave.goblinCount) {
+            type = GOBLIN;
         }
         else {
-            typeToSpawn = ORC;
+            type = ORC;
         }
 
-        enemies.push_back(Enemy(typeToSpawn, path));
+        enemies.push_back(Enemy(path, type));
         enemiesSpawnedSoFar++;
     }
 }
 
 void WaveManager::Draw() {
-    const char* text;
-    if (currentWaveIndex >= waves.size()) text = "VICTORY!";
-    else text = TextFormat("WAVE: %d / %d", currentWaveIndex + 1, waves.size());
-
-    DrawText(text, 20, 80, 20, RED);
-}
+   if (IsVictory()) {
+        DrawText("VICTORY!", 20, 80, 20, RED);
+    else
+        DrawText(TextFormat("WAVE: %d / %d",currentWaveIndex + 1, waves.size()),20, 80, 20, RED);
+   }
+}  
 
 bool WaveManager::IsVictory() const {
     return currentWaveIndex >= waves.size();

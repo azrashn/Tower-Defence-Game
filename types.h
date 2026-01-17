@@ -3,21 +3,15 @@
 
 class Enemy;
 
-enum class TileType // state -> type dönüştürdüm. map.h kısmı buraya gelicek
-{
-    BLOCKED = 0,    // Duvar, Ağaç, Boşluk, SAHTE YOL (Düşman geçemez)
-    ROAD = 1,       // Düşmanın yürüdüğü GERÇEK yol
-    BUILDABLE = 2,  // Kule koyulabilir alan
-    TOWER = 3,      // Üzerinde kule var
-    TARGET = 9      // Pizza (Hedef)
+enum TileType {
+    BLOCKED = 0,    
+    ROAD = 1,       
+    BUILDABLE = 2,  
+    TOWER = 3,      
+    TARGET = 9      
 };
 
-enum EnemyType {
-    GOBLIN,
-    ORC, 
-    BOSS
-};
-
+// Kule Tipleri
 enum TowerType {
     NONE = 0,       // Kule yok veya seçili değil
     ARCHER_TOWER,   // Okçu
@@ -25,17 +19,27 @@ enum TowerType {
     CANNON_TOWER    // Topçu
 };
 
-struct Tile
-{
-    Rectangle rect; // ekranın kapladığı alanı temsil ediyor
+enum EnemyType {
+    GOBLIN, ORC, BOSS
+};
+
+struct Tile {
+    Rectangle rect;
     TileType type;
- 
-    // Genel tanımlamalar. map.h kısmı
+    TowerType towerType;
     bool occupied;
+    bool hasTree;
     Color color;
     int id;
+};
 
-    // x ve y tile'ı yapıp harita kordinat için tanımlandı
-    int gridX;
-    int gridY;
+struct Bullet {
+    Vector2 position;
+    Vector2 targetPos;    // Sabit hedef
+    Enemy* lockedEnemy;   // Kilitlenen Düşman -> mermi takip edecedk
+
+    float speed;
+    float damage;
+    bool active;
+    TowerType type;
 };
