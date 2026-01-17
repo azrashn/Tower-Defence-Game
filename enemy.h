@@ -11,6 +11,7 @@ public:
     void Draw();
     void TakeDamage(float amount);
 
+    //  Yavaşlatma Fonksiyonu 
     void ApplySlow(float factor, float duration);
 
     float GetHealth() const { return health; }
@@ -27,9 +28,11 @@ private:
 
     EnemyType type;
 
+    // hız değişkenleri
     float baseSpeed; 
     float currentSpeed;
 
+    // yavaşlatma değişkenleri
     bool isSlowed;    
     float slowTimer;      
     float health;
