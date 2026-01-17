@@ -134,20 +134,27 @@ void Game::Draw()
         DrawRectangleLinesEx(mouseTile->rect, 2, YELLOW);
     }
 
-    // kuleleri çiz
-   for (Tower& tower : towers) {
-      tower.Draw();
-   }
-
     // Enemy çiz
     for (Enemy& enemy : enemies)
     {
         enemy.Draw();
     }
+        // kuleleri çiz
+   for (Tower& tower : towers) {
+      tower.Draw();
+   }
+      // 4. Arayüz (UI) Çizimi
+    int uiY = 820;
 
-    // Basit UI 
-    DrawText(" Game ", 20, 20, 20, DARKGRAY);
-    DrawText(TextFormat("Gold: %d", gold), 20, 50, 20, GOLD);
+    DrawText("TOWER DEFENSE", 20, uiY, 30, SKYBLUE);
+    DrawText(TextFormat("Gold: %d G", gold), 350, uiY + 5, 24, GOLD);
+    DrawText(TextFormat("Tower: %d/%d", (int)towers.size(), MAX_INNER_TOWERS), 550, uiY + 5, 24, WHITE);
+
+     // Bilgilendirme
+    DrawText("[A] Okcu [S] Buyu [D] Topcu", 1050, uiY + 5, 20, LIGHTGRAY);
+    DrawText("[SAG TIK] Yukselt  [X] Sat", 1050, uiY + 30, 20, LIGHTGRAY);
+
+    DrawLine(0, 800, GetScreenWidth(), 800, DARKGRAY);
 
     if (gameOver) {
         DrawText("GAME OVER", 400, 300, 40, RED);
