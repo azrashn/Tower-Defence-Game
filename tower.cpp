@@ -201,12 +201,12 @@ void Tower::Draw() {
     Rectangle destRec = { // hangi boyutta belirtmek için
         position.x,
         position.y,
-        40.0f,
-        40.0f
+        16.0f,
+        16.0f
     };
 
     // Merkezi Resmin tam ortasını, pozisyonun üzerine, tile'ın yarısı 
-    Vector2 origin = { 20.0f, 20.0f };
+    Vector2 origin = { 8.0f, 8.0f };
 
     // Resmi Çiz
     DrawTexturePro(*currentTex, sourceRec, destRec, origin, 0.0f, WHITE);

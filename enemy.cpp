@@ -39,7 +39,7 @@ Enemy::Enemy(std::vector<Vector2> pathPoints, EnemyType t) {
         maxHealth = 60.0f;   //Can
         damageToTarget = 5.0f; // Target hasar
         goldReward = 10;     // kazanılan Altın
-        radius = 10.0f;  // büyüklüğü
+        radius = 6.0f;  // büyüklüğü
         break;
 
     case ORC:
@@ -47,7 +47,7 @@ Enemy::Enemy(std::vector<Vector2> pathPoints, EnemyType t) {
         maxHealth = 160.0f;      
         damageToTarget = 20.0f; 
         goldReward = 25;        
-        radius = 16.0f;         
+        radius = 10.0f;         
         break;
 
     case BOSS:
@@ -55,7 +55,7 @@ Enemy::Enemy(std::vector<Vector2> pathPoints, EnemyType t) {
         maxHealth = 1000.0f;     
         damageToTarget = 100.0f; 
         goldReward = 200;       
-        radius = 26.0f;         
+        radius = 16.0f;         
         break;
     }
 
