@@ -79,12 +79,20 @@ void WaveManager::Update(std::vector<Enemy>& enemies, const std::vector<Vector2>
 
 void WaveManager::Draw() {
    if (IsVictory()) {
-        DrawText("VICTORY!", 20, 80, 20, RED);
-    else
-        DrawText(TextFormat("WAVE: %d / %d",currentWaveIndex + 1, waves.size()),20, 80, 20, RED);
-   }
-}  
+        DrawText("VICTORY!", (GetScreenWidth() - MeasureText("VICTORY!", 60)) / 2, 300, 60, GREEN);
+        return;
+    }
+       DrawText(TextFormat("WAVE: %d / %d", currentWaveIndex + 1, (int)waves.size()), 20, 80, 20, RED);
+    if (!isSpawning && waveDelayTimer > 0.0f) {
 
+        // Sayacı metne çevir 
+       const char* text = TextFormat("NEXT WAVE: %.1f", waveDelayTimer);
+        // Yazının genişliğini ölç, ortalamak için
+       int textW = MeasureText(text, 40);
+
+       DrawText(text, (GetScreenWidth() - textW) / 2, 400, 40, RED);  //Ekranın  ortasına Kırmızı renkle yaz
+    }
+}
 bool WaveManager::IsVictory() const {
     return currentWaveIndex >= waves.size();
 }
