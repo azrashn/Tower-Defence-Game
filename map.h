@@ -4,26 +4,25 @@
 #include "types.h"
 #include "constants.h" 
 
-// Manages the game board layout
-class Map{
+class Map {
 public:
-    Map();       // Sets up the grid
+    Map();
     ~Map();
 
-    void Draw(); // Renders the whole map
-    void Update(); // Yeni güncelledim. Amaç Update işlemi için tanım yapmak.
+    void Update();
+    void Draw();
+
+    void LoadLevel(int levelIndex);
 
     int GetWidth() const { return currentGridW; }
     int GetHeight() const { return currentGridH; }
 
     Tile* CheckTile(Vector2 position);
-    
+
     Rectangle townHallRect;
 
-    
-
 private:
-   std::vector<std::vector<Tile>> grid;
+    std::vector<std::vector<Tile>> grid;
 
     int currentGridW;
     int currentGridH;
@@ -34,7 +33,10 @@ private:
     Texture2D texTree;
     Texture2D texRoad;
 
+    Texture2D texTowerSlot;
+
     float startX;
     float startY;
     float tileSize;
+
 };
