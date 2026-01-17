@@ -1,26 +1,22 @@
 #pragma once
 #include "raylib.h"
+#include "types.h"
 #include <vector>
 #include "types.h" // <--- DÜZELTME: EnemyType tanımını buradan alacak
 
-// SİLİNDİ: enum EnemyType { ... } bloğu kaldırıldı çünkü types.h içinde zaten var.
-// Bu işlem "redefinition" (yeniden tanımlama) hatasını çözer.
-
 class Enemy {
 public:
-    // Constructor: Hem Tip hem de Yol (path) alıyor (WaveManager ile uyumlu)
-    Enemy(EnemyType type, const std::vector<Vector2>& pathPoints);
+    Enemy(std::vector<Vector2> pathPoints, EnemyType type);
 
     void Update();
     void Draw();
     void TakeDamage(float amount);
 
-    // Yeni Özellikler: Yavaşlatma
     void ApplySlow(float factor, float duration);
 
-    // Getter Fonksiyonları
+    float GetHealth() const { return health; }
     float GetDamageToTarget() const { return damageToTarget; }
-    int GetGoldReward() const { return goldReward; }
+    int GetReward() const { return goldReward; }
 
     bool active;
     Vector2 position;
@@ -31,20 +27,19 @@ public:
     float maxHealth;
 
 private:
-    std::vector<Vector2> path;
-    int currentTarget;
+    std::vector<Vector2> pathPoints;
+    int currentTargetIndex;
+    float radius;
 
     EnemyType type;
 
-    // Hareket Sistemi
-    float baseSpeed;     // Düşmanın normal hızı
-    float currentSpeed;  // Yavaşlayınca düşen anlık hızı
+    float baseSpeed; 
+    float currentSpeed;
 
-    // Yavaşlatma Durumu
-    bool isSlowed;
-    float slowTimer;
-
-    // Ödül ve Hasar
+    bool isSlowed;    
+    float slowTimer;      
+    float health;
+    float maxHealth;
     float damageToTarget;
     int goldReward;
 };

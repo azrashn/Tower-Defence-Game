@@ -7,7 +7,7 @@
 #include "constants.h"
 #include "wave.h" // <--- EKLENDİ: WaveManager dosyasını dahil ettik
 
-class Game {
+class Game{
 public:
     Game();
     void Update();
@@ -17,28 +17,18 @@ public:
     bool gameOver; // Oyun durumu bitmiş mi onu bilip yazdırmak amaçlanıyor
 
 private:
-    Map map;
-
-    // <--- EKLENDİ: Oyundaki dalga yönetimini yapacak ana nesne
-    WaveManager waveManager;
-
-    int gold; // Oyuncu parası 
-
-    // Mapde tile seçimi için gereken tanımlamalar
-    Tile* mouseTile;
-    Tile* lastMouseTile;
-    Tile* selectedTile;
-
-    float mouseTime;
-
+    Map map; // nesne 
     std::vector<Enemy> enemies;
     std::vector<Tower> towers;
 
     // Düşmanların izleyeceği sabit rota
     std::vector<Vector2> levelPath;
 
-    void LoadPathFromGrid(const int points[][2], int count);
+    int gold; // Oyuncu parası 
+    const int MAX_INNER_TOWERS = 8;
 
     float targetHealth;      // Hedefin canı 
-    float maxTargetHealth;   // Hedefin canı bar tasarımı için
+    float maxTargetHealth;   // Hedefin canı bar tasarımı içn
+
+    void LoadPathFromGrid(const int points[][2], int count);
 };

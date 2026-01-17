@@ -1,6 +1,8 @@
 #pragma once
 #include "raylib.h"
 
+class Enemy;
+
 enum class TileType // state -> type dönüştürdüm. map.h kısmı buraya gelicek
 {
     BLOCKED = 0,    // Duvar, Ağaç, Boşluk, SAHTE YOL (Düşman geçemez)
@@ -12,7 +14,15 @@ enum class TileType // state -> type dönüştürdüm. map.h kısmı buraya geli
 
 enum EnemyType {
     GOBLIN,
-    ORC
+    ORC, 
+    BOSS
+};
+
+enum TowerType {
+    NONE = 0,       // Kule yok veya seçili değil
+    ARCHER_TOWER,   // Okçu
+    MAGE_TOWER,     // Büyücü
+    CANNON_TOWER    // Topçu
 };
 
 struct Tile

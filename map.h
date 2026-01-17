@@ -2,25 +2,39 @@
 #include "raylib.h"
 #include <vector>
 #include "types.h"
+#include "constants.h" 
 
 // Manages the game board layout
 class Map{
 public:
     Map();       // Sets up the grid
-    void Draw(); // Renders the whole map
+    ~Map();
 
+    void Draw(); // Renders the whole map
     void Update(); // Yeni güncelledim. Amaç Update işlemi için tanım yapmak.
-    Tile* CheckTile(Vector2 mousePosition); // Seçilen tile koridnatı için tanım gerekiyordu
+
+    int GetWidth() const { return currentGridW; }
+    int GetHeight() const { return currentGridH; }
+
+    Tile* CheckTile(Vector2 position);
     
-    //Yol kontrolü
-    bool IsRoad(int gridX, int gridY) const;
+    Rectangle townHallRect;
 
     
 
 private:
-    std::vector<std::vector<Tile>> grid; // 2D grid storage
-    int rows;
-    int cols;
-    float tileSize; // Size of each block in pixels
-    Texture2D backgroundTexture;
+   std::vector<std::vector<Tile>> grid;
+
+    int currentGridW;
+    int currentGridH;
+
+    Texture2D texBackground;
+    Texture2D texTarget;
+    Texture2D texWall;
+    Texture2D texTree;
+    Texture2D texRoad;
+
+    float startX;
+    float startY;
+    float tileSize;
 };
