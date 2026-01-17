@@ -4,7 +4,7 @@
 #include "types.h"
 #include <vector>
 
-// DAY 6: Basit mermi yapısı
+// Basit mermi yapısı
 struct Bullet {
     Vector2 position;
     Vector2 targetPos;

@@ -2,12 +2,6 @@
 #include "raylib.h"
 #include <vector>
 
-enum EnemyType {
-    GOBLIN,
-    ORC,
-    BOSS  
-};
-
 class Enemy {
 public:
     Enemy(EnemyType type);

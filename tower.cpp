@@ -3,30 +3,34 @@
 
 Tower::Tower(Vector2 pos, TowerType t) {
     position = pos;
+    type = t;
+    level = 1;
+
     range = 140.0f;
     fireCooldown = 1.0f;
     cooldownTimer = 0;
     targetEnemy = nullptr;
 
-    // DAY 6: Türlere göre basit farklar
+    //  Türlere göre basit farklar
     if (type == ARCHER_TOWER) {
+        damage = 15;
         range = 150.0f;
         damage = 15.0f;
         fireCooldown = 0.8f;
     }
     else if (type == MAGE_TOWER) {
+        damage = 60;  
         range = 200.0f;
         damage = 40.0f;
         fireCooldown = 2.0f;
     }
     else { // CANNON
+        damage = 40; 
         range = 130.0f;
         damage = 30.0f;
         fireCooldown = 1.5f;
     }
 }
-
-
 
 void Tower::Update(std::vector<Enemy>& enemies) {
 
@@ -112,7 +116,6 @@ void Tower::Draw() {
     }
 
     // 3. Mermiler
-
     for (Bullet& b : bullets){ 
         if (b.active){ 
             DrawCircleV(b.position, 4, BLACK);
