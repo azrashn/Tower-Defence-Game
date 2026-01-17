@@ -11,24 +11,43 @@ Game::Game() {
     maxTargetHealth = 100.0f;
     targetHealth = maxTargetHealth;
 
-    mouseTile = nullptr;
-
-    const int rawPath[][2] = { // dönüş yerleri hesaplanarak ilerleme sağlanıyor.
-
-        {0, 1},   // Başlangıç Sol taraf, 1. satır
-        {10, 1},  // Sağa kadar git
-        {10, 3},  // Aşağı in -> 3. satıra
-        {1, 3},   // Sola kadar gel)
-        {1, 5},   // Aşağı in -> 5. satır
-        {11, 5}   // Bitiş 
+    const int rawPath[][2] = {
+    {6, 0},   // Başlangıç
+    {6, 3},   // Aşağı in
+    {7, 3},   // Sağa 
+    {7, 4},   // Aşağı 
+    {8, 4},   // Sağ
+    {8, 5},   // Aşağı
+    {17, 5},  // Uzun sağa gidiş
+    {17, 10}, // Aşağı 
+    {2, 10},  // Sola uzun dönüş
+    {2, 17},  // Aşağı
+    {14, 17}, // Sağa
+    {14, 15}, // Yukarı 
+    {29, 15}, // Sağa
+    {29, 10}, // Yukarı
+    {31, 10}  // Hedef
     };
 
-    LoadPathFromGrid(rawPath, 6); // kaç adet olduğu
+    LoadPathFromGrid(rawPath, sizeof(rawPath) / sizeof(rawPath[0]));
+}
+
+void Game::LoadPathFromGrid(const int points[][2], int count) {
+    levelPath.clear();
+
+    for (int i = 0; i < count; i++) {
+        float pixelX = points[i][0] * 40 + 20; //yarısı alınarak yolun ortasında durma mantığı
+        float pixelY  = points[i][1] * 40 + 20;
+        levelPath.push_back({ pixelX, pixelY });
+    }
 }
 
 void Game::Update()
 {
     map.Update();
+
+    // Kule Tipi Seçimi
+    static TowerType currentTowerType = ARCHER_TOWER;
 
     Vector2 mousePosition = GetMousePosition(); // mouse un ekrandaki pozisyonu hesapla
     mouseTile = map.CheckTile(mousePosition);
@@ -37,6 +56,7 @@ void Game::Update()
 
     if (IsKeyPressed(KEY_A)) currentTowerType = ARCHER_TOWER;
     if (IsKeyPressed(KEY_S)) currentTowerType = MAGE_TOWER;
+    if (IsKeyPressed(KEY_D)) currentTowerType = CANNON_TOWER;
 
     // Tower güncelle
     for (Tower& tower : towers)
@@ -45,18 +65,30 @@ void Game::Update()
     }
     // Sol mouse butonu ile kule koymak için
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        if (mouseTile != nullptr) {
-            if (mouseTile->type ==  TileType::BUILDABLE && !mouseTile->occupied) {
+        Vector2 mousePos = GetMousePosition();
+        Tile* clickedTile = map.CheckTile(mousePos);
 
-                mouseTile->occupied = true;
-                mouseTile->type = TileType::TOWER;
+        if (clickedTile != nullptr) {
+            if (clickedTile->type == BUILDABLE && !clickedTile->occupied) {
+                if (towers.size() < MAX_INNER_TOWERS) {
 
-                Vector2 towerPos = {
-                    mouseTile->rect.x + mouseTile->rect.width / 2,
-                    mouseTile->rect.y + mouseTile->rect.height / 2
-                };
+                    int cost = 0;
+                    if (currentTowerType == ARCHER_TOWER) cost = 100;
+                    else if (currentTowerType == MAGE_TOWER) cost = 300;
+                    else if (currentTowerType == CANNON_TOWER) cost = 200;
 
-                towers.push_back(Tower(towerPos, ARCHER_TOWER));
+                    if (gold >= cost) {
+                        gold -= cost;
+                        clickedTile->occupied = true;
+                        clickedTile->type = TOWER;
+
+                        Vector2 towerPos = {
+                            clickedTile->rect.x + TILE_SIZE / 2.0f,
+                            clickedTile->rect.y + TILE_SIZE / 2.0f
+                        };
+                        towers.push_back(Tower(towerPos, currentTowerType));
+                    }
+                }
             }
         }
     }
@@ -69,9 +101,21 @@ void Game::Update()
     for (int i = 0; i < enemies.size(); i++) {
         enemies[i].Update(); // özellikleri için ilerde  // index hangi düşman olduğunu gösteren
 
-        if (!enemies[i].active)
-        {
-            enemies.erase(enemies.begin() + i);  // vectorün indexini silmek ve vektör ilerlemesini sabit tutmak için
+       if (!enemies[i].active) {
+            // Hedefe ulaştı mı yoksa biz mi vurduk?
+            if (enemies[i].GetHealth() > 0) {
+                // Hedefe ulaştı, canımız yandı
+                targetHealth -= enemies[i].GetDamageToTarget();
+                if (targetHealth <= 0) {
+                    targetHealth = 0;
+                    gameOver = true;
+                    }
+                }
+                else {
+                    // Biz vurduk, para kazan
+                    gold += enemies[i].GetReward();
+            }
+            enemies.erase(enemies.begin() + i);
             i--;
         }
     }
@@ -79,15 +123,6 @@ void Game::Update()
 
 void Game::Reset() {  }
 
-void Game::LoadPathFromGrid(const int points[][2], int count) {
-    levelPath.clear();
-
-    for (int i = 0; i < count; i++) {
-        float px = points[i][0] * 40 + 20; //yarısı alınarak yolun ortasında durma mantığı
-        float py = points[i][1] * 40 + 20;
-        levelPath.push_back({ px, py });
-    }
-}
 
 void Game::Draw()
 {
