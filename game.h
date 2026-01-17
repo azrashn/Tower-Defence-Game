@@ -5,24 +5,27 @@
 #include "raylib.h"
 #include "tower.h"
 #include "constants.h"
+#include "wave.h" // <--- EKLENDİ: WaveManager dosyasını dahil ettik
 
-class Game
-{
+class Game {
 public:
     Game();
     void Update();
     void Draw();
     void Reset(); // Oyunu sıfırlama fonksiyonu
 
-    bool gameOver; // Oyun durumu bitmişmi onu bilip yazdırmak amaçlanıyor
+    bool gameOver; // Oyun durumu bitmiş mi onu bilip yazdırmak amaçlanıyor
 
 private:
-    Map map; // nesne 
+    Map map;
+
+    // <--- EKLENDİ: Oyundaki dalga yönetimini yapacak ana nesne
+    WaveManager waveManager;
 
     int gold; // Oyuncu parası 
-     
+
     // Mapde tile seçimi için gereken tanımlamalar
-    Tile* mouseTile;;
+    Tile* mouseTile;
     Tile* lastMouseTile;
     Tile* selectedTile;
 
@@ -31,12 +34,11 @@ private:
     std::vector<Enemy> enemies;
     std::vector<Tower> towers;
 
-    //  Düşmanların izleyeceği sabit rota
+    // Düşmanların izleyeceği sabit rota
     std::vector<Vector2> levelPath;
 
-     void LoadPathFromGrid(const int points[][2], int count);
+    void LoadPathFromGrid(const int points[][2], int count);
 
     float targetHealth;      // Hedefin canı 
-    float maxTargetHealth;   // Hedefin canı bar tasarımı içn
-
+    float maxTargetHealth;   // Hedefin canı bar tasarımı için
 };

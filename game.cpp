@@ -3,6 +3,7 @@
 #include "tower.h"
 #include "enemy.h"
 #include "raylib.h"
+#include "wave.h" // <--- EKLENDİ: Wave sistemini dahil ettik
 
 Game::Game() {
     gold = 500;       // Oyuncunun başlangıç para değeri
@@ -14,20 +15,25 @@ Game::Game() {
     mouseTile = nullptr;
 
     const int rawPath[][2] = { // dönüş yerleri hesaplanarak ilerleme sağlanıyor.
-
         {0, 1},   // Başlangıç Sol taraf, 1. satır
         {10, 1},  // Sağa kadar git
         {10, 3},  // Aşağı in -> 3. satıra
-        {1, 3},   // Sola kadar gel)
+        {1, 3},   // Sola kadar gel
         {1, 5},   // Aşağı in -> 5. satır
         {11, 5}   // Bitiş 
     };
 
     LoadPathFromGrid(rawPath, 6); // kaç adet olduğu
+
+    // <--- EKLENDİ: Dalga sistemini (WaveManager) başlatıyoruz.
+    // Bu fonksiyon 1. dalgayı hazırlar.
+    waveManager.Init();
 }
 
-void Game::Update()
-{
+void Game::Update() {
+    // Oyun bittiyse (Kaybettiysek) durdur
+    if (gameOver) return;
+
     map.Update();
 
     Vector2 mousePosition = GetMousePosition(); // mouse un ekrandaki pozisyonu hesapla
@@ -43,11 +49,13 @@ void Game::Update()
     {
         tower.Update(enemies);
     }
+
     // Sol mouse butonu ile kule koymak için
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (mouseTile != nullptr) {
-            if (mouseTile->type ==  TileType::BUILDABLE && !mouseTile->occupied) {
+            if (mouseTile->type == TileType::BUILDABLE && !mouseTile->occupied) {
 
+                // (İleride buraya if (gold >= 100) kontrolü eklenecek)
                 mouseTile->occupied = true;
                 mouseTile->type = TileType::TOWER;
 
@@ -61,23 +69,29 @@ void Game::Update()
         }
     }
 
-    if (enemies.empty()) {
-        enemies.push_back(Enemy(levelPath));
+    // <--- DEĞİŞTİ: Eski manuel spawn kodu silindi.
+    // Artık düşman üretimini WaveManager yönetiyor.
+    if (!waveManager.IsVictory()) {
+        waveManager.Update(enemies, levelPath);
     }
 
-    // Enemy güncellemek için
+    // Enemy güncellemek ve silmek için
     for (int i = 0; i < enemies.size(); i++) {
-        enemies[i].Update(); // özellikleri için ilerde  // index hangi düşman olduğunu gösteren
+        enemies[i].Update();
 
+        // Düşman öldü mü veya aktifliği bitti mi?
         if (!enemies[i].active)
         {
-            enemies.erase(enemies.begin() + i);  // vectorün indexini silmek ve vektör ilerlemesini sabit tutmak için
+            // (İleride buraya gold += 20; eklenecek)
+            enemies.erase(enemies.begin() + i);
             i--;
         }
     }
 }
 
-void Game::Reset() {  }
+void Game::Reset() {
+    // Reset mantığı ileride buraya eklenebilir
+}
 
 void Game::LoadPathFromGrid(const int points[][2], int count) {
     levelPath.clear();
@@ -89,8 +103,7 @@ void Game::LoadPathFromGrid(const int points[][2], int count) {
     }
 }
 
-void Game::Draw()
-{
+void Game::Draw() {
     // Haritayı çizme fonksiyonu
     map.Draw();
 
@@ -100,9 +113,9 @@ void Game::Draw()
     }
 
     // kuleleri çiz
-   for (Tower& tower : towers) {
-      tower.Draw();
-   }
+    for (Tower& tower : towers) {
+        tower.Draw();
+    }
 
     // Enemy çiz
     for (Enemy& enemy : enemies)
@@ -114,7 +127,15 @@ void Game::Draw()
     DrawText(" Game ", 20, 20, 20, DARKGRAY);
     DrawText(TextFormat("Gold: %d", gold), 20, 50, 20, GOLD);
 
+    // <--- EKLENDİ: Wave bilgisini ekrana yazdır (Örn: WAVE: 1 / 5)
+    waveManager.Draw();
+
+    // Oyun Sonu ve Zafer Ekranları
     if (gameOver) {
         DrawText("GAME OVER", 400, 300, 40, RED);
+    }
+    else if (waveManager.IsVictory()) {
+        // <--- EKLENDİ: Zafer durumu kontrolü
+        DrawText("VICTORY!", 400, 300, 50, GREEN);
     }
 }
