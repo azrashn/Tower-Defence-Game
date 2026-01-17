@@ -1,28 +1,42 @@
 #pragma once
 #include "raylib.h"
 #include <vector>
+#include "types.h"
+#include "constants.h" 
 
-// Represents a single square on the grid
-struct Tile
-{
-    Rectangle rect; // Position and size
-    int id;         // Tile type (e.g., 0=Grass, 6=Road)
-    Color color;    // Debug or visual color
-};
-
-// Manages the game board layout
-class Map
-{
+class Map {
 public:
-    Map();       // Sets up the grid
-    void Draw(); // Renders the whole map
+    Map();
+    ~Map();
 
-    void Update(); // Yeni güncelledim. Amaç Update işlemi için tanım yapmak.
-    Tile* CheckTile(Vector2 mousePosition); // Seçilen tile koridnatı için tanım gerekiyordu
+    void Update();
+    void Draw();
+
+    void LoadLevel(int levelIndex);
+
+    int GetWidth() const { return currentGridW; }
+    int GetHeight() const { return currentGridH; }
+
+    Tile* CheckTile(Vector2 position);
+
+    Rectangle townHallRect;
 
 private:
-    std::vector<std::vector<Tile>> grid; // 2D grid storage
-    int rows;
-    int cols;
-    float tileSize; // Size of each block in pixels
+    std::vector<std::vector<Tile>> grid;
+
+    int currentGridW;
+    int currentGridH;
+
+    Texture2D texBackground;
+    Texture2D texTarget;
+    Texture2D texWall;
+    Texture2D texTree;
+    Texture2D texRoad;
+
+    Texture2D texTowerSlot;
+
+    float startX;
+    float startY;
+    float tileSize;
+
 };

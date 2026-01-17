@@ -1,31 +1,48 @@
 #pragma once
 #include "raylib.h"
+#include "types.h"
 #include <vector>
-
-enum EnemyType {
-    GOBLIN,
-    ORC
-};
+#include "types.h" // <--- DÜZELTME: EnemyType tanımını buradan alacak
 
 class Enemy {
 public:
-    Enemy(EnemyType type);
+    Enemy(std::vector<Vector2> pathPoints, EnemyType type);
 
     void Update();
     void Draw();
     void TakeDamage(float amount);
 
+    //  Yavaşlatma Fonksiyonu 
+    void ApplySlow(float factor, float duration);
+
+    float GetHealth() const { return health; }
+    float GetDamageToTarget() const { return damageToTarget; }
+    int GetReward() const { return goldReward; }
+
     bool active;
     Vector2 position;
 
+    // Draw ve çarpışma kontrolü için public değişkenler
+    float radius;
+    float health;
+    float maxHealth;
+
 private:
-    std::vector<Vector2> path;
-    int currentTarget;
+    std::vector<Vector2> pathPoints;
+    int currentTargetIndex;
+    float radius;
 
     EnemyType type;
 
-    float speed;
+    // hız değişkenleri
+    float baseSpeed; 
+    float currentSpeed;
+
+    // yavaşlatma değişkenleri
+    bool isSlowed;    
+    float slowTimer;      
     float health;
     float maxHealth;
-    float radius;
+    float damageToTarget;
+    int goldReward;
 };

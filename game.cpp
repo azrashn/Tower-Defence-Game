@@ -1,68 +1,177 @@
 #include "game.h"
+#include "types.h"
+#include "tower.h"
+#include "enemy.h"
 #include "raylib.h"
+#include "wave.h" // <--- EKLENDİ: Wave sistemini dahil ettik
 
 Game::Game() {
     gold = 500;       // Oyuncunun başlangıç para değeri
     gameOver = false;
 
-    mouseTile = nullptr;
-    lastMouseTile = nullptr; // Bir önceki frame’deki tile
-    selectedTile = nullptr;
+    maxTargetHealth = 100.0f;
+    targetHealth = maxTargetHealth;
 
-    mouseTime = 0.0f;  // Mouse aynı tile üzerinde durma süresi
+    const int rawPath[][2] = {
+    {6, 0},   // Başlangıç
+    {6, 3},   // Aşağı in
+    {7, 3},   // Sağa 
+    {7, 4},   // Aşağı 
+    {8, 4},   // Sağ
+    {8, 5},   // Aşağı
+    {17, 5},  // Uzun sağa gidiş
+    {17, 10}, // Aşağı 
+    {2, 10},  // Sola uzun dönüş
+    {2, 17},  // Aşağı
+    {14, 17}, // Sağa
+    {14, 15}, // Yukarı 
+    {29, 15}, // Sağa
+    {29, 10}, // Yukarı
+    {31, 10}  // Hedef
+    };
 
-    enemies.push_back(Enemy()); // enemy ekleme
+    LoadPathFromGrid(rawPath, sizeof(rawPath) / sizeof(rawPath[0]));
 }
 
-void Game::Update()
-{
+void Game::LoadPathFromGrid(const int points[][2], int count) {
+    levelPath.clear();
+
+    for (int i = 0; i < count; i++) {
+        float pixelX = points[i][0] * 40 + 20; //yarısı alınarak yolun ortasında durma mantığı
+        float pixelY  = points[i][1] * 40 + 20;
+        levelPath.push_back({ pixelX, pixelY });
+    }
+}
+
+void Game::Update() {
+    // Oyun bittiyse (Kaybettiysek) durdur
+    if (gameOver) return;
+
     map.Update();
 
+    // Kule Tipi Seçimi
+    static TowerType currentTowerType = ARCHER_TOWER;
+
     Vector2 mousePosition = GetMousePosition(); // mouse un ekrandaki pozisyonu hesapla
-    mouseTile = map.CheckTile(mousePosition); 
+    mouseTile = map.CheckTile(mousePosition);
 
-    // Mouse aynı tile üzerindeyse süre artsın
-    if (mouseTile && mouseTile == lastMouseTile)
+    static TowerType currentTowerType = ARCHER_TOWER;
+
+    if (IsKeyPressed(KEY_A)) currentTowerType = ARCHER_TOWER;
+    if (IsKeyPressed(KEY_S)) currentTowerType = MAGE_TOWER;
+    if (IsKeyPressed(KEY_D)) currentTowerType = CANNON_TOWER;
+
+    // Tower güncelle
+    for (Tower& tower : towers)
     {
-       mouseTime += GetFrameTime(); // Son çizilen frama ile önceki arasındaki süre belirlemek için 60FPS
-    }
-    else // diğer türlü tile süresini sıfırla
-    {
-      mouseTime = 0.0f;
-      lastMouseTile = mouseTile;
+        tower.Update(enemies);
     }
 
-    if (mouseTile && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) { // Click yapısı tile ile
-         selectedTile = mouseTile; // yapılan click anını adreste saklıyor. Amaç tıklandığı anda tile seçmek
-    }
+    // Sol mouse butonu ile kule koymak için
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        Vector2 mousePos = GetMousePosition();
+        Tile* clickedTile = map.CheckTile(mousePos);
 
-    for (int i = 0; i < enemies.size(); i++) { 
-        enemies[i].Update();  // özellikleri için ilerde  // index hangi düşman olduğunu gösteren
+        if (clickedTile != nullptr) {
+            if (clickedTile->type == BUILDABLE && !clickedTile->occupied) {
+                if (towers.size() < MAX_INNER_TOWERS) {
 
-        if (!enemies[i].active) { 
-            enemies.erase(enemies.begin() + i); // vectorün indexini silmek ve vektör ilerlemesini sabit tutmak için
-            i--;
+                    int cost = 0;
+                    if (currentTowerType == ARCHER_TOWER) cost = 100;
+                    else if (currentTowerType == MAGE_TOWER) cost = 300;
+                    else if (currentTowerType == CANNON_TOWER) cost = 200;
+
+                    if (gold >= cost) {
+                        gold -= cost;
+                        clickedTile->occupied = true;
+                        clickedTile->type = TOWER;
+
+                        Vector2 towerPos = {
+                            clickedTile->rect.x + TILE_SIZE / 2.0f,
+                            clickedTile->rect.y + TILE_SIZE / 2.0f
+                        };
+                        towers.push_back(Tower(towerPos, currentTowerType));
+                    }
+                }
+            }
         }
     }
 
+    // <--- DEĞİŞTİ: Eski manuel spawn kodu silindi.
+    // Artık düşman üretimini WaveManager yönetiyor.
+    if (!waveManager.IsVictory()) {
+        waveManager.Update(enemies, levelPath);
+    }
+
+    // Enemy güncellemek ve silmek için
+    for (int i = 0; i < enemies.size(); i++) {
+        enemies[i].Update();
+
+       if (!enemies[i].active) {
+            // Hedefe ulaştı mı yoksa biz mi vurduk?
+            if (enemies[i].GetHealth() > 0) {
+                // Hedefe ulaştı, canımız yandı
+                targetHealth -= enemies[i].GetDamageToTarget();
+                if (targetHealth <= 0) {
+                    targetHealth = 0;
+                    gameOver = true;
+                    }
+                }
+                else {
+                    // Biz vurduk, para kazan
+                    gold += enemies[i].GetReward();
+            }
+            enemies.erase(enemies.begin() + i);
+            i--;
+        }
+    }
+}
+
+void Game::Reset() {
+    // Reset mantığı ileride buraya eklenebilir
 }
 
 
-void Game::Draw()
-{
-   // Haritayı çizme fonksiyonu
+void Game::Draw() {
+    // Haritayı çizme fonksiyonu
     map.Draw();
 
     if (mouseTile != nullptr)
     {
-       DrawRectangleLinesEx(mouseTile->rect, 2, YELLOW);
+        DrawRectangleLinesEx(mouseTile->rect, 2, YELLOW);
     }
 
-    // Basit UI 
-    DrawText(" Game ", 20, 20, 20, DARKGRAY);
-    DrawText(TextFormat("Gold: %d", gold), 20, 50, 20, GOLD);
+    // Enemy çiz
+    for (Enemy& enemy : enemies)
+    {
+        enemy.Draw();
+    }
+        // kuleleri çiz
+   for (Tower& tower : towers) {
+      tower.Draw();
+   }
+      // 4. Arayüz (UI) Çizimi
+    int uiY = 820;
 
+    DrawText("TOWER DEFENSE", 20, uiY, 30, SKYBLUE);
+    DrawText(TextFormat("Gold: %d G", gold), 350, uiY + 5, 24, GOLD);
+    DrawText(TextFormat("Tower: %d/%d", (int)towers.size(), MAX_INNER_TOWERS), 550, uiY + 5, 24, WHITE);
+
+     // Bilgilendirme
+    DrawText("[A] Okcu [S] Buyu [D] Topcu", 1050, uiY + 5, 20, LIGHTGRAY);
+    DrawText("[SAG TIK] Yukselt  [X] Sat", 1050, uiY + 30, 20, LIGHTGRAY);
+
+    DrawLine(0, 800, GetScreenWidth(), 800, DARKGRAY);
+
+    // <--- EKLENDİ: Wave bilgisini ekrana yazdır (Örn: WAVE: 1 / 5)
+    waveManager.Draw();
+
+    // Oyun Sonu ve Zafer Ekranları
     if (gameOver) {
         DrawText("GAME OVER", 400, 300, 40, RED);
+    }
+    else if (waveManager.IsVictory()) {
+        // <--- EKLENDİ: Zafer durumu kontrolü
+        DrawText("VICTORY!", 400, 300, 50, GREEN);
     }
 }
