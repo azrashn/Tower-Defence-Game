@@ -1,9 +1,9 @@
 #include "map.h"
-#include "types.h"
 #include <iostream>
 #include "constants.h"
 #include <string>
 
+// 0: Boş, 1: Duvar, 6: Yol, 3: Kule Yeri, 9: Hedef
 const int ROWS_COUNT = 20;
 const int COLS_COUNT = 36;
 
@@ -18,8 +18,8 @@ int level1Data[ROWS_COUNT][COLS_COUNT] = {
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,2,6,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,3,3,3,3,3,3,3,3,3,3,3,3,3,2,6,2,3,0,0,0,0,0,0,0,0,2,2,2,2,2,2,0,0},
     {0,0,3,2,2,2,2,2,2,2,2,2,2,2,2,2,6,6,2,3,0,0,0,2,2,2,2,2,2,6,6,6,6,2,0,0},
-    {0,0,2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,2,0,0,0,0,0,0,0,0,0,0,2,6,9,9,6,2,0,0},
-    {0,2,6,6,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,2,6,9,9,6,2,0,0},
+    {0,0,2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,2,0,0,0,0,0,0,0,0,0,0,2,6,91,93,6,2,0,0},
+    {0,2,6,6,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,2,6,92,94,6,2,0,0},
     {0,2,6,2,3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,2,6,6,6,6,2,0,0},
     {0,2,6,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,6,2,2,2,2,0,0},
     {0,2,6,2,3,0,0,0,0,0,0,0,0,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,6,2,0,0,0,0,0},
@@ -29,6 +29,30 @@ int level1Data[ROWS_COUNT][COLS_COUNT] = {
     {0,0,0,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 };
+
+int level2Data[ROWS_COUNT][COLS_COUNT] = {
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
+    {0,1,6,6,6,6,6,6,6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0},
+    {0,1,6,2,2,2,2,2,6,2,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0},
+    {0,1,6,2,3,3,3,2,6,2,3,0,0,0,0,3,2,6,6,6,6,6,6,6,6,2,2,2,2,2,2,2,2,2,1,0},
+    {0,1,6,2,3,0,3,2,6,2,3,0,0,0,0,3,2,6,2,2,2,2,2,2,6,2,3,3,3,3,3,3,3,3,1,0},
+    {0,1,6,2,3,3,3,2,6,2,3,0,0,0,0,3,2,6,2,3,3,3,3,2,6,2,3,0,0,0,0,0,0,3,1,0},
+    {0,1,6,6,6,6,6,6,6,2,3,3,3,3,3,3,2,6,2,3,0,0,3,2,6,2,3,0,0,0,0,0,0,3,1,0},
+    {0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,6,2,3,3,3,3,2,6,2,3,3,3,3,3,3,3,3,1,0},
+    {0,1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,2,6,2,2,2,2,2,2,6,2,2,2,2,2,2,2,2,2,1,0},
+    {0,1,2,3,0,0,0,0,0,0,0,0,0,0,0,3,2,6,6,6,6,6,6,6,6,2,6,6,6,6,6,6,6,2,1,0},
+    {0,1,2,3,0,0,0,0,0,0,0,0,0,0,0,3,2,2,2,2,2,2,2,2,2,2,6,2,2,2,2,2,6,2,1,0},
+    {0,1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,2,3,3,3,3,3,3,3,3,2,6,2,3,3,3,2,6,2,1,0},
+    {0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,0,0,0,0,0,0,3,2,6,2,3,0,3,2,6,2,1,0},
+    {0,1,2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,0,0,0,0,0,0,3,2,6,2,3,3,3,2,6,2,1,0},
+    {0,1,2,6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,2,6,2,2,2,2,2,6,2,1,0},
+    {0,1,2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,2,3,3,3,2,6,2,1,0},
+    {0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,9,3,2,6,2,1,0},
+    {0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+};
+
 
 Map::Map() {
     tileSize = (float)TILE_SIZE;
@@ -41,6 +65,7 @@ Map::Map() {
     texTree = LoadTexture("assets/Tree3.png");
     texRoad = LoadTexture("assets/Road.png");
     texTarget = LoadTexture("assets/target.png");
+    texTowerSlot = LoadTexture("assets/tower_slot.png");
     texBackground = { 0 };
 
     LoadLevel(1); // Direkt 1. leveli yükle
@@ -51,6 +76,7 @@ Map::~Map() {
     UnloadTexture(texTree);
     UnloadTexture(texRoad);
     UnloadTexture(texTarget);
+    UnloadTexture(texTowerSlot);
     if (texBackground.id != 0) UnloadTexture(texBackground);
 }
 
@@ -64,6 +90,17 @@ void Map::LoadLevel(int levelIndex) {
     texBackground = LoadTexture(bgPath.c_str());
 
     grid.clear(); // Izgarayı temizle
+
+    // Bir pointer yardımıyla doğru diziyi seçiyoruz
+    int (*selectedLevelData)[COLS_COUNT];
+
+    if (levelIndex == 1) {
+        selectedLevelData = level1Data;
+    }
+    else {
+        // Varsayılan olarak Level 2 
+        selectedLevelData = level2Data;
+    }
 
 
     for (int y = 0; y < ROWS_COUNT; y++) {
@@ -98,6 +135,15 @@ void Map::LoadLevel(int levelIndex) {
             case 9: // Hedef
                 t.type = BLOCKED; t.color = RED;
                 break;
+     
+            case 91: //  Sol Üst - Ana Parça
+            case 92: //  Sağ Üst 
+            case 93: //  Sol Alt 
+            case 94: //  Sağ Alt 
+                t.type = BLOCKED;
+                t.color = BLANK; // Renk yok,  resim olacak
+                break;
+
             default:
                 t.type = BLOCKED; t.color = BLACK;
                 break;
@@ -137,7 +183,7 @@ Tile* Map::CheckTile(Vector2 position) {
 }
 
 void Map::Draw() {
-    
+
     if (texBackground.id != 0) {
         Rectangle source = { 0, 0, (float)texBackground.width, (float)texBackground.height };
         Rectangle dest = { startX, startY, (float)(currentGridW * tileSize), (float)(currentGridH * tileSize) };
@@ -152,14 +198,43 @@ void Map::Draw() {
             Tile& t = grid[y][x];
             if (t.id == 0) continue;
 
-            if (t.id == 1) DrawTexturePro(texWall, { 0,0,(float)texWall.width,(float)texWall.height }, t.rect, { 0,0 }, 0, WHITE);
-            // Yol, Hedef, Ağaç 
-            if (t.type == ROAD) DrawTexturePro(texRoad, { 0,0,(float)texRoad.width,(float)texRoad.height }, t.rect, { 0,0 }, 0, WHITE);
-
-            if (t.type == BUILDABLE && !t.occupied) {
-                Vector2 center = { t.rect.x + tileSize / 2, t.rect.y + tileSize / 2 };
-                DrawCircleV(center, 6, Fade(WHITE, 0.8f));
+            //  Duvar 
+            if (t.id == 1) {
+                DrawTexturePro(texWall, { 0,0,(float)texWall.width,(float)texWall.height }, t.rect, { 0,0 }, 0, WHITE);
             }
+            // Yol
+            else if (t.type == ROAD) {
+                DrawTexturePro(texRoad, { 0,0,(float)texRoad.width,(float)texRoad.height }, t.rect, { 0,0 }, 0, WHITE);
+            }
+                //  3.Kule yeri
+            else if (t.id == 3) { 
+
+                // Kule olsa da olmasa da bu zemin hep orada dursun
+                DrawTexturePro(texTowerSlot,{ 0,0, (float)texTowerSlot.width, (float)texTowerSlot.height },t.rect, { 0,0 }, 0, WHITE);
+
+                //  Eğer boşsa, beyaz noktayı çiz
+                if (!t.occupied) {
+                    Vector2 center = { t.rect.x + tileSize / 2, t.rect.y + tileSize / 2 };
+                    DrawCircleV(center, 6, Fade(WHITE, 0.8f));
+                }
+            }
+            else if (t.id == 91) { // ID 91: Target 
+
+                // Hedef: (x, y) noktasından başla, 2 kare sağa, 2 kare aşağı yayıl.
+                Rectangle destRect = {
+                    t.rect.x,            // Başlangıç X
+                    t.rect.y,           // Başlangıç Y
+                    tileSize * 2.0f,   // Genişlik: 2 Kare
+                    tileSize * 2.0f   // Yükseklik: 2 Kare
+                };
+
+                // Tek bir resmi (target.png) büyütüp o alana koyucaz
+                DrawTexturePro(texTarget,{ 0, 0, (float)texTarget.width, (float)texTarget.height }, // Resmin tamamı
+                    destRect,{ 0, 0 }, 0.0f, WHITE);     // Hedef: 2x2'lik alan
+            }
+             else if (t.id == 92 || t.id == 93 || t.id == 94) {  //diğer parçalar zaten diğerinin üzeirne çizildi
+                continue;
+             }
         }
     }
 }
