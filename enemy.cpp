@@ -1,45 +1,55 @@
 #include "enemy.h"
+#include "raymath.h" 
 #include <cmath>
 
-Enemy::Enemy(EnemyType t) {
-    type = t;
+Enemy::Enemy(std::vector<Vector2> pathPoints, EnemyType t) {
 
-    // TEST YOLU 
-    path.push_back({ 50, 200 });
-    path.push_back({ 300, 200 });
-    path.push_back({ 300, 400 });
+    baseSpeed = 0.0f;
+    currentSpeed = 0.0f;
+    maxHealth = 0.0f;
+    health = 0.0f;
+    damageToTarget = 0.0f;
+    goldReward = 0;
 
-    position = path[0];
-    currentTarget = 1;
-    active = true;
-
-    // Yavaşlatma başlangıç
     isSlowed = false;
     slowTimer = 0.0f;
 
-     switch (type) {
+    this->pathPoints = pathPoints;
+    this->type = t;
 
+    if (!pathPoints.empty()) {
+        position = pathPoints[0];
+    }
+    else {
+        position = { -100, -100 };
+    }
+
+    active = true;
+    currentTargetIndex = 1;
+    radius = 12.0f;
+
+    switch (type) {
     case GOBLIN:
-        baseSpeed = 3.5f;
-        maxHealth = 40.0f;
+        baseSpeed = 4.0f;
+        maxHealth = 30.0f;
         damageToTarget = 5.0f;
         goldReward = 10;
-        radius = 8.0f;
+        radius = 10.0f;
         break;
 
     case ORC:
         baseSpeed = 2.0f;
-        maxHealth = 90.0f;
+        maxHealth = 80.0f;
         damageToTarget = 20.0f;
         goldReward = 25;
-        radius = 12.0f;
+        radius = 14.0f;
         break;
 
-    case BOSS: // 
+    case BOSS:
         baseSpeed = 1.0f;
-        maxHealth = 400.0f;
-        damageToTarget = 80.0f;
-        goldReward = 150;
+        maxHealth = 500.0f;
+        damageToTarget = 100.0f;
+        goldReward = 200;
         radius = 20.0f;
         break;
     }
@@ -48,7 +58,6 @@ Enemy::Enemy(EnemyType t) {
     health = maxHealth;
 }
 
-// YAVAŞLATMA
 void Enemy::ApplySlow(float factor, float duration) {
     isSlowed = true;
     slowTimer = duration;
@@ -56,61 +65,71 @@ void Enemy::ApplySlow(float factor, float duration) {
 }
 
 void Enemy::Update() {
-    if (!active || path.empty()) return;
+    if (!active || pathPoints.empty()) return;
 
-    // YAVAŞLATMA SÜRESİ
     if (isSlowed) {
         slowTimer -= GetFrameTime();
+
         if (slowTimer <= 0) {
             isSlowed = false;
             currentSpeed = baseSpeed;
         }
     }
 
-    if (currentTarget >= path.size()) {
+    if (currentTargetIndex >= pathPoints.size()) {
         active = false;
         return;
     }
 
-    Vector2 target = path[currentTarget];
+    Vector2 target = pathPoints[currentTargetIndex];
 
-    if (position.x < target.x) position.x += currentSpeed;
-    else if (position.x > target.x) position.x -= currentSpeed;
-
-    if (position.y < target.y) position.y += currentSpeed;
-    else if (position.y > target.y) position.y -= currentSpeed;
-
-    if (fabs(position.x - target.x) < 1.0f &&
-        fabs(position.y - target.y) < 1.0f) {
-        position = target;
-        currentTarget++;
+    if (position.x < target.x) {
+        position.x += currentSpeed;
+        if (position.x > target.x) position.x = target.x;
     }
-}
+    else if (position.x > target.x) {
+        position.x -= currentSpeed;
+        if (position.x < target.x) position.x = target.x;
+    }
 
-void Enemy::TakeDamage(float amount) {
-    health -= amount;
-    if (health <= 0) {
-        health = 0;
-        active = false;
+    if (position.y < target.y) {
+        position.y += currentSpeed;
+        if (position.y > target.y) position.y = target.y;
+    }
+    else if (position.y > target.y) {
+        position.y -= currentSpeed;
+        if (position.y < target.y) position.y = target.y;
+    }
+
+    if (abs(position.x - target.x) < 1.0f && abs(position.y - target.y) < 1.0f) {
+
+        position = target;
+        currentTargetIndex++;
     }
 }
 
 void Enemy::Draw() {
     if (!active) return;
 
-    Color bodyColor = RED;
-    if (type == GOBLIN) bodyColor = LIME;
-    else if (type == ORC) bodyColor = DARKGREEN;
-    else bodyColor = PURPLE; // BOSS
+    Color color = RED;
 
-    // Yavaşlamışsa maviye çevir
-    if (isSlowed) bodyColor = SKYBLUE;
+    if (type == GOBLIN) color = LIME;
+    else if (type == ORC) color = DARKGREEN;
+    else if (type == BOSS) color = PURPLE;
 
-    DrawCircleV(position, radius, bodyColor);
-    DrawCircleLines(position.x, position.y, radius, BLACK);
+    if (isSlowed) {
+        color = SKYBLUE;
+    }
+    DrawCircle((int)position.x, (int)position.y, (float)radius, color);
+    DrawCircleLines((int)position.x, (int)position.y, (float)radius, BLACK);
 
-    // CAN BARI
-    float hpRatio = health / maxHealth;
-    DrawRectangle(position.x - radius, position.y - radius - 8,
-                  (radius * 2) * hpRatio, 5, GREEN);
+    float hpPercent = health / maxHealth;
+    DrawRectangle(position.x - 10, position.y - 15, 20 * hpPercent, 4, GREEN);
+}
+
+void Enemy::TakeDamage(float amount) {
+    health -= amount;
+    if (health <= 0) {
+        active = false;
+    }
 }
