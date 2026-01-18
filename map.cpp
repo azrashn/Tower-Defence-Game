@@ -167,13 +167,10 @@ void Map::Draw() {
                 //  3.Kule yeri
             else if (t.id == 3) { 
 
-                // Kule olsa da olmasa da bu zemin hep orada dursun
-                DrawTexturePro(texTowerSlot,{ 0,0, (float)texTowerSlot.width, (float)texTowerSlot.height },t.rect, { 0,0 }, 0, WHITE);
-
                 //  Eğer boşsa, beyaz noktayı çiz
                 if (!t.occupied) {
-                    Vector2 center = { t.rect.x + tileSize / 2, t.rect.y + tileSize / 2 };
-                    DrawCircleV(center, 6, Fade(WHITE, 0.8f));
+                    Vector2 center = { t.rect.x + tileSize / 2.0f, t.rect.y + tileSize / 2.0f };
+                    DrawCircleV(center, 2.0f, Fade(WHITE, 0.5f));
                 }
             }
             else if (t.id == 91) { // ID 91: Target 

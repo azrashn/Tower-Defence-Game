@@ -27,6 +27,13 @@ Tower::Tower(Vector2 pos, TowerType t) {
     type = t;
     level = 1; // seviye 1 başlar
 
+    damage = 0;
+    range = 0.0f;
+    fireCooldown = 0.0f;
+    bulletSpeed = 0.0f;
+    totalSpent = 0;
+    upgradeCost = 0;
+
     upgradeCost = 150;
     cooldownTimer = 0.0f;
     targetEnemy = nullptr;
@@ -177,8 +184,8 @@ int Tower::GetSellRefund() const {
 }
 
 void Tower::Draw() {
-   
-    // KULE TİPİNE GÖRE RESİM SEÇİMİ
+
+    //  KULE TİPİNE GÖRE RESİM SEÇİMİ
     Texture2D* currentTex = &texArcher; // Varsayılan
 
     if (type == MAGE_TOWER) {
@@ -188,48 +195,45 @@ void Tower::Draw() {
         currentTex = &texCannon;
     }
 
-    //MENZİL ÇİZİMİ
-    DrawCircleLines((int)position.x, (int)position.y, range, Fade(DARKGRAY, 0.4f));// Hafif şeffaf gri bir daire 
+    //  MENZİL ÇİZİMİ (DEBUG İÇİN 
+    DrawCircleLines((int)position.x, (int)position.y, range, Fade(DARKGRAY, 0.2f));
 
-    // KULE GÖVDESİ 
-    Rectangle sourceRec = { // Resmin tamamını alarak kullanıyoruz
-        0.0f, 0.0f,
-        (float)currentTex->width,
-        (float)currentTex->height
+    //  ÖLÇEKLEME VE ÇERÇEVE AYARLARI
+    float scale = 0.8f;
+
+    Rectangle sourceRec = {0.0f, 0.0f, (float)currentTex->width,(float)currentTex->height };
+
+    //  HEDEF ALAN VE ÇAP AYARI
+    Rectangle destRec = {
+        position.x,             // Yatayda karenin ortasına koyacağız
+        position.y + 8.0f,      // Dikeyde karenin EN ALTINA hizalayacağız
+        (float)currentTex->width * scale,
+        (float)currentTex->height * scale
     };
 
-    Rectangle destRec = { // hangi boyutta belirtmek için
-        position.x,
-        position.y,
-        16.0f,
-        16.0f
-    };
+    Vector2 origin = { destRec.width / 2.0f,destRec.height };
 
-    // Merkezi Resmin tam ortasını, pozisyonun üzerine, tile'ın yarısı 
-    Vector2 origin = { 8.0f, 8.0f };
-
-    // Resmi Çiz
+    //  RESMİ ÇİZ
     DrawTexturePro(*currentTex, sourceRec, destRec, origin, 0.0f, WHITE);
 
-    // Kulenin biraz üzerine seviyesini yazalım
-    DrawText(TextFormat("Lvl %d", level), (int)position.x - 10, (int)position.y - 30, 10, BLACK);
+    //  SEVİYE YAZISI
+    DrawText(TextFormat("Lvl %d", level),
+        (int)position.x - 10,
+        (int)(position.y - destRec.height + 10), // Kulenin tepesinin biraz üstü
+        10, BLACK);
 
     //  MERMİLERİ ÇİZ
     for (const Bullet& b : bullets) {
         if (b.active) {
             if (b.type == ARCHER_TOWER) {
-                // Okçu mermisi: Küçük Kahverengi nokta
-                DrawCircleV(b.position, 4, BROWN);
+                DrawCircleV(b.position, 2, BROWN); 
             }
             else if (b.type == MAGE_TOWER) {
-                // Büyücü mermisi: Parlak mor küre
-                DrawCircleV(b.position, 6, VIOLET);
+                DrawCircleV(b.position, 3, VIOLET); 
             }
             else if (b.type == CANNON_TOWER) {
-                // Topçu mermisi: Kare veya büyük siyah gülle
-                DrawCircleV(b.position, 5, DARKGRAY);
+                DrawCircleV(b.position, 3, DARKGRAY); 
             }
         }
     }
 }
-

@@ -11,7 +11,8 @@ const int pathLevel1[][2] = {
     {19, 23},  
     {39, 23},  
     {39, 31},  
-    {62, 21},  
+    {62, 31}, 
+    {62, 21},
     {75, 21},  
     {75, 6} 
 };
@@ -35,9 +36,17 @@ Game::~Game() {
 // Grid koordinatlarından alıp piksele çevriliyor
 void Game::LoadPathFromGrid(const int points[][2], int count) {
     levelPath.clear();
+
+    float mapWidthPx = COLS * TILE_SIZE; // 90 * 16 = 1440
+    float startX = (SCREEN_WIDTH - mapWidthPx) / 2.0f;
+
     for (int i = 0; i < count; i++) {
-        float pixelX = points[i][0] * 40 + 20; // Otomatik hesaplıyor
-        float pixelY = points[i][1] * 40 + 20; 
+        // ARTIK 40 YOK, TILE_SIZE VAR
+        float pixelX = (points[i][0] * TILE_SIZE) + (TILE_SIZE / 2.0f);
+        float pixelY = (points[i][1] * TILE_SIZE) + (TILE_SIZE / 2.0f);
+        
+        pixelX += startX;
+
         levelPath.push_back({ pixelX, pixelY });
     }
 }
