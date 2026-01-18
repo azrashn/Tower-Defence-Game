@@ -34,4 +34,6 @@ private:
     float waveDelayTimer;
 
     int enemiesSpawnedSoFar;
+    
+    bool isSpawning; 
 };

@@ -1,124 +1,239 @@
 #include "tower.h"
-#include "raymath.h"
+#include "raymath.h" 
+#include <iostream>
+
+
+// Değişkenleri tanımlama
+Texture2D Tower::texArcher = { 0 };
+Texture2D Tower::texMage = { 0 };
+Texture2D Tower::texCannon = { 0 };
+
+// Resmleri Yükleme Fonksiyonu
+void Tower::InitTextures() {
+    texArcher = LoadTexture("assets/tower_archer.png");
+    texMage = LoadTexture("assets/tower_mage.png");
+    texCannon = LoadTexture("assets/tower_cannon.png");
+}
+
+// Resimleri Silme Fonksiyonu
+void Tower::UnloadTextures() {
+    UnloadTexture(texArcher);
+    UnloadTexture(texMage);
+    UnloadTexture(texCannon);
+}
 
 Tower::Tower(Vector2 pos, TowerType t) {
     position = pos;
     type = t;
-    level = 1;
+    level = 1; // seviye 1 başlar
 
-    range = 140.0f;
-    fireCooldown = 1.0f;
-    cooldownTimer = 0;
+    damage = 0;
+    range = 0.0f;
+    fireCooldown = 0.0f;
+    bulletSpeed = 0.0f;
+    totalSpent = 0;
+    upgradeCost = 0;
+
+    upgradeCost = 150;
+    cooldownTimer = 0.0f;
     targetEnemy = nullptr;
 
-    //  Türlere göre basit farklar
     if (type == ARCHER_TOWER) {
-        damage = 15;
+        damage = 8;
+        fireCooldown = 0.8f; 
         range = 150.0f;
-        damage = 15.0f;
-        fireCooldown = 0.8f;
+        bulletSpeed = 6.0f;  
+        upgradeCost = 100;  
     }
     else if (type == MAGE_TOWER) {
-        damage = 60;  
-        range = 200.0f;
-        damage = 40.0f;
-        fireCooldown = 2.0f;
+        damage = 30;         //  hasar
+        fireCooldown = 2.5f; // dolumma süresi
+        range = 220.0f;      // menzil
+        bulletSpeed = 3.0f;  // mermi süzülür
+        upgradeCost = 300;   // yükseltme fiyatı
     }
-    else { // CANNON
-        damage = 40; 
-        range = 130.0f;
-        damage = 30.0f;
-        fireCooldown = 1.5f;
+    else if (type == CANNON_TOWER) {
+        damage = 16; 
+        fireCooldown = 1.5f; 
+        range = 130.0f; 
+        bulletSpeed = 4.5f;
+        upgradeCost = 200;
     }
+
+    if (type == ARCHER_TOWER) totalSpent = 100;
+    else if (type == MAGE_TOWER) totalSpent = 300;
+    else if (type == CANNON_TOWER) totalSpent = 200;
+}
+
+// Kuleyi Güncelleme Fonksiyonu
+void Tower::Upgrade() {
+
+    int cost = GetUpgradeCost(); // Upgrade maliyeti
+    totalSpent += cost;          
+
+    level++;            // Seviye atla
+    damage += 15.0f;    // Hasarı artır
+    range += 20.0f;     // Menzili uzat
+
+    // Ateş hızını artır
+    if (fireCooldown > 0.2f) {
+        fireCooldown *= 0.9f;
+    }
+
+    upgradeCost += 100;
+    std::cout << "Kule Upgrade Edildi! Yeni Level: " << level << std::endl;
 }
 
 void Tower::Update(std::vector<Enemy>& enemies) {
 
-    // 1. Mermileri güncelle
+    //  MERMİLERİ HAREKET ETTİRME TASARIMI
     for (int i = 0; i < bullets.size(); i++) {
-        if (!bullets[i].active) {
+        if (bullets[i].active) {
+
+            // Eğer kilitlendiğimiz düşman hala yaşıyorsa, hedefi güncelle -> Takip Et
+            if (bullets[i].lockedEnemy != nullptr &&
+                bullets[i].lockedEnemy->active &&
+                bullets[i].lockedEnemy->GetHealth() > 0) {
+
+                bullets[i].targetPos = bullets[i].lockedEnemy->position;
+            }
+
+            // Mermiyi hedefe doğru yürüt
+            bullets[i].position = Vector2MoveTowards(bullets[i].position, bullets[i].targetPos, bullets[i].speed);
+
+            // Hedefe ulaştı mı?
+            if (Vector2Distance(bullets[i].position, bullets[i].targetPos) < 5.0f) {
+                bullets[i].active = false; // Mermiyi yok et
+            }
+        }
+        else {
             bullets.erase(bullets.begin() + i);
             i--;
-            continue;
-        }
-
-        bullets[i].position =
-            Vector2MoveTowards(bullets[i].position,
-                               bullets[i].targetPos,
-                               bullets[i].speed);
-
-        if (Vector2Distance(bullets[i].position,
-                            bullets[i].targetPos) < 5.0f) {
-            bullets[i].active = false;
         }
     }
 
-     // 2. Cooldown azalt
-    if (cooldownTimer > 0)
+    //  ATEŞ ETME MANTIĞI 
+    if (cooldownTimer > 0) {  // Silahı Soğut
         cooldownTimer -= GetFrameTime();
+    }
 
     targetEnemy = nullptr;
 
-    // 3. Hedef bul + ateş et
     for (Enemy& enemy : enemies) {
         if (!enemy.active) continue;
 
+        // Mesafe hesapla
         float dist = Vector2Distance(position, enemy.position);
-        if (dist <= range) {
 
+        if (dist <= range) {
             targetEnemy = &enemy;
 
+            // Ateş Etme Hazır mı?
             if (cooldownTimer <= 0) {
 
-                // HASAR VER
+                if (type == CANNON_TOWER) {
+                    float explosionRadius = 70.0f; // Patlama çapı (ne kadar geniş vuracağı)
+
+                    // Tüm düşmanları kontrol et: Hedefin yakınındakiler de hasar yesin
+                    for (Enemy& subEnemy : enemies) {
+                        if (subEnemy.active) {
+                            // Hedef düşmana olan mesafesi 70 birimden az olan herkesi vur
+                            if (Vector2Distance(subEnemy.position, enemy.position) <= explosionRadius) {
+                                subEnemy.TakeDamage(damage);
+                            }
+                        }
+                    }
+                    std::cout << "BOOM!Area damage dealt" << std::endl;
+                }
+                // 2. DİĞER KULELER İSE TEK HEDEFİ VUR
+                else {
+                    enemy.TakeDamage(damage);
+                }
+
+                //  Hasar verme (Anlık vuruş - Hitscan)
                 enemy.TakeDamage(damage);
 
-                // MERMİ OLUŞTUR (görsel)
+                // Eğer ateş eden kule BÜYÜCÜ ise yavaşlatma uygula
+                if (type == MAGE_TOWER) {
+                    // Hızı %50 (0.5f) düşür ve 2.0 saniye sürsün
+                    enemy.ApplySlow(0.5f, 2.0f);
+                }
+
+                //  mermi oluşturma görsel olarak
                 Bullet b;
                 b.position = position;
                 b.targetPos = enemy.position;
-                b.speed = 6.0f;
+                b.lockedEnemy = &enemy;       // Düşmana kilitlenme
+                b.speed = bulletSpeed;
                 b.damage = damage;
                 b.active = true;
+                b.type = type;
 
                 bullets.push_back(b);
 
+                // 3. Silahı tekrar doldur
                 cooldownTimer = fireCooldown;
             }
             break;
         }
     }
+}
 
-    for (Bullet& b : bullets) {
-        if (!b.active) continue;
-
-        b.position = Vector2MoveTowards(b.position, b.targetPos, b.speed);
-        if (Vector2Distance(b.position, b.targetPos) < 4)
-            b.active = false;
-    }
+int Tower::GetSellRefund() const {
+    return (int)(totalSpent * 0.30f); // %30 iade
 }
 
 void Tower::Draw() {
-     // 1. Menzil
-      DrawCircleLines((int)position.x, (int)position.y, range, Fade(DARKGRAY, 0.4f) );
 
-    // 2. Kule gövdesi
-    Color c = GRAY;
-    if (type == ARCHER_TOWER) c = BLUE;
-    if (type == MAGE_TOWER)  c = PURPLE;
-    else if (type == CANNON_TOWER) towerColor = RED;
+    //  KULE TİPİNE GÖRE RESİM SEÇİMİ
+    Texture2D* currentTex = &texArcher; // Varsayılan
 
-    DrawCircleLines(position.x, position.y, range, Fade(GRAY, 0.3f));
-    DrawRectangle(position.x - 16, position.y - 16, 32, 32, c);
-
-       if (targetEnemy) {
-        DrawLineV(position, targetEnemy->position, RED);
+    if (type == MAGE_TOWER) {
+        currentTex = &texMage;
+    }
+    else if (type == CANNON_TOWER) {
+        currentTex = &texCannon;
     }
 
-    // 3. Mermiler
-    for (Bullet& b : bullets){ 
-        if (b.active){ 
-            DrawCircleV(b.position, 4, BLACK);
+    //  MENZİL ÇİZİMİ (DEBUG İÇİN 
+    DrawCircleLines((int)position.x, (int)position.y, range, Fade(DARKGRAY, 0.2f));
+
+    //  ÖLÇEKLEME VE ÇERÇEVE AYARLARI
+    float scale = 0.8f;
+
+    Rectangle sourceRec = {0.0f, 0.0f, (float)currentTex->width,(float)currentTex->height };
+
+    //  HEDEF ALAN VE ÇAP AYARI
+    Rectangle destRec = {
+        position.x,             // Yatayda karenin ortasına koyacağız
+        position.y + 8.0f,      // Dikeyde karenin EN ALTINA hizalayacağız
+        (float)currentTex->width * scale,
+        (float)currentTex->height * scale
+    };
+
+    Vector2 origin = { destRec.width / 2.0f,destRec.height };
+
+    //  RESMİ ÇİZ
+    DrawTexturePro(*currentTex, sourceRec, destRec, origin, 0.0f, WHITE);
+
+    //  SEVİYE YAZISI
+    DrawText(TextFormat("Lvl %d", level),
+        (int)position.x - 10,
+        (int)(position.y - destRec.height + 10), // Kulenin tepesinin biraz üstü
+        10, BLACK);
+
+    //  MERMİLERİ ÇİZ
+    for (const Bullet& b : bullets) {
+        if (b.active) {
+            if (b.type == ARCHER_TOWER) {
+                DrawCircleV(b.position, 2, BROWN); 
+            }
+            else if (b.type == MAGE_TOWER) {
+                DrawCircleV(b.position, 3, VIOLET); 
+            }
+            else if (b.type == CANNON_TOWER) {
+                DrawCircleV(b.position, 3, DARKGRAY); 
+            }
         }
     }
 }
